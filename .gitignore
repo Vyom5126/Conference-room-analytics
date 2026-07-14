@@ -1,0 +1,52 @@
+# ── Python ──────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+*.so
+
+# ── Virtual Environments ────────────────────────────────────────────────────
+venv/
+.venv/
+env/
+ENV/
+
+# ── Jupyter ─────────────────────────────────────────────────────────────────
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# ── Data & Models (large binaries — store in DVC or LFS if needed) ──────────
+data/images_candidate/
+models/*.joblib
+models/*.pkl
+models/*.pt
+
+# ── YOLO cache ──────────────────────────────────────────────────────────────
+runs/
+*.pt
+
+# ── Outputs ─────────────────────────────────────────────────────────────────
+outputs/detections/
+outputs/candidate_detections/
+outputs/*.png
+outputs/*.csv
+outputs/*.json
+
+# ── Features (reproducible — regenerate with pipeline) ──────────────────────
+features/*.csv
+
+# ── OS & IDE ─────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+*.code-workspace
+
+# ── Logs ────────────────────────────────────────────────────────────────────
+*.log

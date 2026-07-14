@@ -1,0 +1,81 @@
+# Conference Room Quality Assessor — config
+
+# Paths
+paths:
+  images_dir: "data/images"
+  labels_csv: "data/labels.csv"
+  detections_dir: "outputs/detections"
+  features_csv: "features/features.csv"
+  models_dir: "models"
+  outputs_dir: "outputs"
+
+# Detection (YOLOv8)
+detection:
+  model_name: "yolov8n.pt"          # nano model — fast & good enough
+  confidence_threshold: 0.30        # minimum confidence to accept detection
+  iou_threshold: 0.45               # NMS IOU threshold
+  image_size: 640                   # inference resolution
+  device: ""                        # "" = auto (CPU/GPU), "cpu", "cuda:0"
+  relevant_classes:                 # COCO classes we care about
+    - chair
+    - dining table
+    - handbag
+    - backpack
+    - bottle
+    - cup
+    - laptop
+    - person
+    - cell phone
+    - remote
+    - book
+
+# Feature engineering
+features:
+  clutter_classes:
+    - handbag
+    - backpack
+    - bottle
+    - cup
+    - laptop
+    - cell phone
+    - remote
+    - book
+  furniture_classes:
+    - chair
+    - dining table
+  floor_region_fraction: 0.45       # bottom fraction considered "floor"
+
+# Model training
+model:
+  target_column: "overall_score"
+  test_size: 0.20
+  random_state: 42
+  xgboost:
+    n_estimators: 200
+    max_depth: 4
+    learning_rate: 0.08
+    subsample: 0.8
+    colsample_bytree: 0.8
+    min_child_weight: 2
+  random_forest:
+    n_estimators: 200
+    max_depth: 6
+    random_state: 42
+
+# CLIP baseline
+clip:
+  model_name: "openai/clip-vit-base-patch32"
+  positive_prompt: "a clean, organized, professional conference room with neatly arranged chairs and a tidy table"
+  negative_prompt: "a messy, cluttered, disorganized conference room with chairs out of place and objects scattered"
+
+# Visualization (bounding box colors for evaluate.py)
+visualization:
+  bbox_thickness: 2
+  font_scale: 0.55
+  score_bar_figsize: [10, 4]
+  colors:                           # BGR (OpenCV format)
+    chair: [0, 200, 100]
+    dining table: [100, 180, 255]
+    clutter: [0, 60, 220]
+    person: [255, 140, 0]
+    default: [180, 180, 180]
