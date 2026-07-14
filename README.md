@@ -7,14 +7,14 @@ Scores the visual quality of conference rooms from a single image — using YOLO
 
 ---
 
-## Motivation
+## Project Overview
 
-I wanted a way to automatically assess whether a conference room looks clean and presentation-ready — without manual review. The pipeline:
+This project provides an automated way to assess whether a conference room appears clean and presentation-ready without requiring manual inspection. The pipeline:
 
-1. Detects objects (chairs, tables, clutter, people) using a pretrained YOLOv8n model
-2. Computes interpretable features (chair spacing variance, clutter density, table surface occupancy, etc.)
-3. Trains regression models on scores assigned via category-based rules (see `data/generate_labels.py`)
-4. Compares against CLIP zero-shot as a baseline
+- Detects objects (chairs, tables, clutter, people) using a pretrained YOLOv8n model.
+- Computes interpretable features such as chair spacing variance, clutter density, and table surface occupancy.
+- Trains regression models on scores generated using category-based rules (see `data/generate_labels.py`).
+- Compares the approach against a CLIP zero-shot baseline.
 
 ---
 
