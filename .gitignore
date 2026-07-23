@@ -20,15 +20,11 @@ ENV/
 .ipynb_checkpoints/
 *.ipynb_checkpoints
 
-# ── Data & Models (large binaries — store in DVC or LFS if needed) ──────────
+# ── Data & Models ────────────────────────────────────────────────────────────
 data/images_candidate/
-models/*.joblib
-models/*.pkl
-models/*.pt
 
 # ── YOLO cache ──────────────────────────────────────────────────────────────
 runs/
-*.pt
 
 # ── Outputs ─────────────────────────────────────────────────────────────────
 outputs/detections/
