@@ -70,34 +70,7 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 def get_config():
     return load_config()
 
-@st.cache_resource(show_spinner="Loading YOLO model…")
-def warm_yolo(config):
-    """Pre-load YOLO so the first user request isn't slow."""
-    from ultralytics import YOLO
-    cfg = config.get("detection", {})
-    model_name = cfg.get("model_name", "yolov8n.pt")
-    return YOLO(model_name)
-
-@st.cache_resource(show_spinner="Loading ML models…")
-def warm_ml_models(config):
-    """Pre-load all 4 joblib models into evaluate's cache."""
-    paths = config.get("paths", {})
-    models_dir = ROOT / paths.get("models_dir", "models")
-    import joblib
-    cache = {}
-    for name in ["xgboost", "random_forest", "ridge_regression", "linear_regression"]:
-        p = models_dir / f"{name}.joblib"
-        if p.exists():
-            cache[str(p)] = joblib.load(p)
-    return cache
-
 config = get_config()
-_yolo   = warm_yolo(config)          # loads YOLO once into ev._yolo_cache too
-_ml     = warm_ml_models(config)     # loads joblib models
-
-# Seed evaluate's caches so runtime requests skip loading
-ev._yolo_cache.update({config.get("detection",{}).get("model_name","yolov8n.pt"): _yolo})
-ev._ml_cache.update(_ml)
 
 # ── Helper: annotated image bytes → numpy for st.image ───────────────────────
 def read_annotated(stem: str) -> np.ndarray | None:

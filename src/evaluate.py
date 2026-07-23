@@ -34,13 +34,18 @@ def stars(score):
     return "★"*n + "☆"*(5-n)
 
 
+_yolo_cache: dict = {}   # loaded once per process
+
 def detect(image_path, config):
     """Run YOLOv8 on a single image. Returns a list of detected objects."""
     from ultralytics import YOLO
     cfg  = config.get("detection", {})
     keep = set(cfg.get("relevant_classes", ["chair","dining table","handbag","backpack",
                                             "bottle","cup","laptop","person","cell phone","remote","book"]))
-    model    = YOLO(cfg.get("model_name", "yolov8n.pt"))
+    model_name = cfg.get("model_name", "yolov8n.pt")
+    if model_name not in _yolo_cache:
+        _yolo_cache[model_name] = YOLO(model_name)
+    model    = _yolo_cache[model_name]
     keep_ids = {cid for cid, name in model.names.items() if name in keep}
     res = model.predict(source=str(image_path),
                         conf=float(cfg.get("confidence_threshold", 0.30)),
@@ -74,12 +79,17 @@ def get_features(dets, config):
     )
 
 
+_ml_cache: dict = {}     # loaded once per process
+
 def predict(feat, models_dir, model_name="xgboost"):
-    """Load a saved model and return (quality_score, list_of_warnings)."""
-    path = models_dir / f"{model_name.lower().replace(' ','_')}.joblib"
-    if not path.exists():
-        raise FileNotFoundError(f"Model not found: {path}\nRun score.py first.")
-    payload = joblib.load(path)
+    """Load a saved model (cached) and return (quality_score, list_of_warnings)."""
+    path      = models_dir / f"{model_name.lower().replace(' ','_')}.joblib"
+    cache_key = str(path)
+    if cache_key not in _ml_cache:
+        if not path.exists():
+            raise FileNotFoundError(f"Model not found: {path}\nRun score.py first.")
+        _ml_cache[cache_key] = joblib.load(path)
+    payload = _ml_cache[cache_key]
     X = pd.DataFrame([{c: feat.get(c, 0.0) for c in payload["feature_cols"]}])
     score = float(np.clip(payload["model"].predict(X)[0], 1.0, 5.0))
 
