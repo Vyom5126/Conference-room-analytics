@@ -1,0 +1,8 @@
+# Extra dependencies for data collection, the CLIP baseline, notebooks and tests.
+-r requirements.txt
+tqdm~=4.68                # clip_baseline.py, data/download_images.py, 01_fetch_conference_images.py
+datasets~=5.0             # 01_fetch_conference_images.py (SUN397 from Hugging Face)
+requests~=2.34            # data/download_images.py
+seaborn~=0.13             # notebooks
+jupyter                   # notebooks
+pytest~=9.1               # tests/

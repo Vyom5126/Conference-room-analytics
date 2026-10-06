@@ -3,19 +3,16 @@ streamlit_app.py
 Conference Room Quality Assessor — Streamlit UI
 Upload a room image → YOLO detection → feature extraction → ML quality score
 """
-import sys, tempfile, platform
+import sys
 from pathlib import Path
 
-# On Linux/cloud: use real Pillow. On Windows: inject stub to avoid Smart App Control.
-if platform.system() == "Windows":
-    sys.path.insert(0, str(Path(__file__).parent / "src" / "pil_stub"))
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
 import cv2
 import numpy as np
 import streamlit as st
 
-from utils import ROOT, load_config
+from utils import load_config
 import evaluate as ev
 
 # ── Page config ───────────────────────────────────────────────────────────────
@@ -72,26 +69,20 @@ def get_config():
 
 config = get_config()
 
-# ── Helper: annotated image bytes → numpy for st.image ───────────────────────
-def read_annotated(stem: str) -> np.ndarray | None:
-    paths    = config.get("paths", {})
-    dets_dir = ROOT / paths.get("detections_dir", "outputs/detections")
-    ann_path = dets_dir / f"{stem}_annotated.jpg"
-    if not ann_path.exists():
-        return None
-    img = cv2.imread(str(ann_path))
-    return cv2.cvtColor(img, cv2.COLOR_BGR2RGB) if img is not None else None
-
-def stars(score: float) -> str:
-    n = round(score)
-    return "★" * n + "☆" * (5 - n)
+MODEL_LABELS = {
+    "clip_ridge":       "CLIP linear probe (best)",
+    "hybrid_ridge":     "CLIP + YOLO features",
+    "ridge_regression": "YOLO features only (baseline)",
+}
 
 def score_label(score: float) -> str:
-    return ["", "Poor", "Fair", "Good", "Very Good", "Excellent"][round(score)]
+    return ["", "Poor", "Fair", "Good", "Very Good", "Excellent"][int(score + 0.5)]
 
 # ── UI ────────────────────────────────────────────────────────────────────────
 st.title("🏢 Conference Room Quality Assessor")
 st.caption("Upload a conference room photo and get an AI-powered quality score.")
+st.info("Prototype: models are trained on 288 photos rated by an AI judge (Claude) against a written "
+        "rubric. The ratings have not yet been checked against human raters, so treat scores as indicative.")
 
 uploaded = st.file_uploader(
     "Choose an image",
@@ -103,33 +94,29 @@ if uploaded:
     col_img, col_ctrl = st.columns([2, 1])
 
     with col_img:
-        st.image(uploaded, caption="Uploaded image", use_container_width=True)
+        st.image(uploaded, caption="Uploaded image", width="stretch")
 
     with col_ctrl:
         model_name = st.selectbox(
             "Model",
-            ["xgboost", "random_forest", "ridge_regression", "linear_regression"],
-            format_func=lambda x: x.replace("_", " ").title(),
+            list(MODEL_LABELS),
+            format_func=MODEL_LABELS.get,
         )
-        run = st.button("🔍 Evaluate Room", use_container_width=True, type="primary")
+        run = st.button("🔍 Evaluate Room", width="stretch", type="primary")
 
     if run:
-        img_bytes = uploaded.read()
-        suffix = Path(uploaded.name).suffix.lower() or ".jpg"
+        img = cv2.imdecode(np.frombuffer(uploaded.getvalue(), np.uint8), cv2.IMREAD_COLOR)
+        if img is None:
+            st.error("❌ Could not decode the uploaded image.")
+            st.stop()
 
-        with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
-            tmp.write(img_bytes)
-            tmp_path = Path(tmp.name)
-
-        with st.spinner("Detecting objects and scoring…"):
+        with st.spinner("Detecting objects and scoring… (the first run downloads the CLIP model)"):
             try:
-                result = ev.run(tmp_path, model_name, save_outputs=True, config=config)
+                result = ev.run(img, model_name, save_outputs=False, config=config,
+                                name=uploaded.name, quiet=True)
             except Exception as exc:
                 st.error(f"❌ Error: {exc}")
-                tmp_path.unlink(missing_ok=True)
                 st.stop()
-
-        tmp_path.unlink(missing_ok=True)
 
         overall   = result["overall_score"]
         breakdown = result["breakdown"]
@@ -141,16 +128,14 @@ if uploaded:
         <div class="score-hero">
             <div class="score-num">{overall:.1f}</div>
             <div class="score-denom">/ 5.0</div>
-            <div class="score-stars">{stars(overall)}</div>
+            <div class="score-stars">{ev.stars(overall)}</div>
             <div class="score-label">{score_label(overall)}</div>
         </div>
         """, unsafe_allow_html=True)
 
         # ── Annotated image ──────────────────────────────────────────────────
-        ann = read_annotated(tmp_path.stem)
-        if ann is not None:
-            st.markdown('<p class="section-label">Detected Objects</p>', unsafe_allow_html=True)
-            st.image(ann, use_container_width=True)
+        st.markdown('<p class="section-label">Detected Objects</p>', unsafe_allow_html=True)
+        st.image(cv2.cvtColor(result["annotated"], cv2.COLOR_BGR2RGB), width="stretch")
 
         # ── Score breakdown gauges ───────────────────────────────────────────
         st.markdown('<p class="section-label">Score Breakdown</p>', unsafe_allow_html=True)
@@ -163,7 +148,7 @@ if uploaded:
         c1, c2, c3, c4 = st.columns(4)
         c1.metric("Objects",  int(result["detections_count"]))
         c2.metric("Chairs",   int(feat.get("chair_count", 0)))
-        c3.metric("Clutter",  int(feat.get("clutter_object_count", 0)))
+        c3.metric("Small items", int(feat.get("clutter_object_count", 0)))
         c4.metric("Occupied", "Yes" if feat.get("person_present") else "No")
 
         # ── Warnings ─────────────────────────────────────────────────────────
@@ -173,4 +158,4 @@ if uploaded:
                 st.markdown(f'<div class="warn-box">{w}</div>', unsafe_allow_html=True)
 
         # ── Model badge ──────────────────────────────────────────────────────
-        st.caption(f"Model: {model_name.replace('_',' ').title()}")
+        st.caption(f"Model: {MODEL_LABELS[model_name]}")

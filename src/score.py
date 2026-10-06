@@ -1,71 +1,113 @@
 """
 score.py
-Train 4 regression models on the features, evaluate them, and save the best one.
-Also saves feature importance and comparison charts to outputs/.
+For every target in config.model.targets, cross-validate a predict-the-mean
+baseline and models built on three feature sets, using repeated K-fold:
+
+  detection  13 YOLO features          → Linear, Ridge, Random Forest, XGBoost
+  clip       CLIP image embeddings     → Ridge ("linear probe")
+  hybrid     embeddings + YOLO features → Ridge
+
+Each model is then refit on all labelled data and saved to
+models/<target>/<model>.joblib. Writes outputs/cv_results.csv, out-of-fold
+predictions for the primary target, and comparison charts.
+
+Images rated valid_room = 0 in labels.csv (not conference rooms) are left out.
 
 Usage:
     python src/score.py
-    python src/score.py --target cleanliness_score
 """
 import argparse, logging, warnings
 from pathlib import Path
-import joblib, numpy as np, pandas as pd, yaml
+import joblib, numpy as np, pandas as pd
 import matplotlib; matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from scipy.stats import pearsonr, spearmanr
+from scipy.stats import kendalltau, spearmanr
+from sklearn.base import clone
+from sklearn.dummy import DummyRegressor
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.linear_model import LinearRegression, Ridge
+from sklearn.linear_model import LinearRegression, RidgeCV
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
-from sklearn.model_selection import cross_val_score, train_test_split
+from sklearn.model_selection import KFold, RepeatedKFold, cross_val_predict
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from xgboost import XGBRegressor
+from embed import load_embeddings
 from utils import ROOT, load_config
 
 warnings.filterwarnings("ignore")
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s", datefmt="%H:%M:%S")
 log = logging.getLogger(__name__)
 
+# model key → (display name, feature set)
+MODEL_INFO = {
+    "dummy_mean":        ("Dummy (mean)",                "detection"),
+    "linear_regression": ("Linear Regression (YOLO)",    "detection"),
+    "ridge_regression":  ("Ridge (YOLO)",                "detection"),
+    "random_forest":     ("Random Forest (YOLO)",        "detection"),
+    "xgboost":           ("XGBoost (YOLO)",              "detection"),
+    "clip_ridge":        ("Ridge (CLIP embeddings)",     "clip"),
+    "hybrid_ridge":      ("Ridge (CLIP + YOLO)",         "hybrid"),
+}
 
 
 def metrics(y_true, y_pred):
-    """Compute MAE, RMSE, R², Pearson-r, Spearman-r."""
-    return {"MAE":       round(mean_absolute_error(y_true, y_pred), 4),
-            "RMSE":      round(float(np.sqrt(mean_squared_error(y_true, y_pred))), 4),
-            "R2":        round(r2_score(y_true, y_pred), 4),
-            "Pearson_r": round(pearsonr(y_true, y_pred)[0], 4),
-            "Spearman_r":round(spearmanr(y_true, y_pred)[0], 4)}
+    """Compute MAE, RMSE, R², Spearman-ρ, Kendall-τ (rank metrics are NaN for constant predictions)."""
+    const = np.ptp(y_pred) == 0
+    return {"MAE":        mean_absolute_error(y_true, y_pred),
+            "RMSE":       float(np.sqrt(mean_squared_error(y_true, y_pred))),
+            "R2":         r2_score(y_true, y_pred),
+            "Spearman_r": np.nan if const else spearmanr(y_true, y_pred)[0],
+            "Kendall_t":  np.nan if const else kendalltau(y_true, y_pred)[0]}
 
 
-def load_data(features_path, labels_path, target_col):
-    """Merge features.csv and labels.csv. Return X (features), y (target), feature names."""
-    feat  = pd.read_csv(features_path)
+def load_data(features_path, embeddings_path, labels_path):
+    """
+    Join labels with YOLO features and CLIP embeddings, dropping images rated valid_room = 0.
+    Returns (labels DataFrame, {feature set: X DataFrame}).
+    """
     label = pd.read_csv(labels_path)
-    df    = feat.merge(label, on="filename", how="inner")
-    if len(df) == 0:
-        raise ValueError("No matching filenames between features.csv and labels.csv")
-    if target_col not in df.columns:
-        raise ValueError(f"Column '{target_col}' not found. Options: {list(label.columns)}")
-    cols = [c for c in feat.columns if c != "filename" and pd.api.types.is_numeric_dtype(df[c])]
-    return df[cols].fillna(0.0), df[target_col].astype(float), cols
+    if "valid_room" in label.columns:
+        n_bad = int((label["valid_room"] == 0).sum())
+        label = label[label["valid_room"] != 0]
+        log.info("Excluding %d images rated valid_room = 0 (not conference rooms)", n_bad)
+    feat = pd.read_csv(features_path).set_index("filename")
+    emb  = load_embeddings(embeddings_path)
+
+    names = [f for f in label["filename"] if f in feat.index and f in emb.index]
+    if not names:
+        raise ValueError("No filenames shared by labels, features and embeddings")
+    if len(names) < len(label):
+        log.warning("%d labelled images have no features/embeddings — skipped", len(label) - len(names))
+    label = label.set_index("filename").loc[names].reset_index()
+
+    det = feat.loc[names].select_dtypes("number").fillna(0.0)
+    clip = emb.loc[names]
+    X = {"detection": det, "clip": clip, "hybrid": pd.concat([clip, det], axis=1)}
+    return label, {k: v.reset_index(drop=True) for k, v in X.items()}
 
 
-def make_models(config):
-    """Return the 4 models we will train and compare."""
-    xgb = config.get("model", {}).get("xgboost", {})
-    rf  = config.get("model", {}).get("random_forest", {})
+def make_models(config, seed):
+    """Return {model key: unfitted estimator}."""
+    cfg    = config.get("model", {})
+    xgb    = cfg.get("xgboost", {})
+    rf     = cfg.get("random_forest", {})
+    alphas = [float(a) for a in cfg.get("ridge_alphas", [0.1, 1, 10, 100, 1000])]
+    ridge  = lambda: Pipeline([("sc", StandardScaler()), ("m", RidgeCV(alphas=alphas))])
     return {
-        "Linear Regression": Pipeline([("sc", StandardScaler()), ("m", LinearRegression())]),
-        "Ridge Regression":  Pipeline([("sc", StandardScaler()), ("m", Ridge(alpha=1.0))]),
-        "Random Forest": RandomForestRegressor(n_estimators=int(rf.get("n_estimators",200)),
-                            max_depth=rf.get("max_depth",6), random_state=42, n_jobs=-1),
-        "XGBoost": XGBRegressor(n_estimators=int(xgb.get("n_estimators",200)),
+        "dummy_mean":        DummyRegressor(strategy="mean"),
+        "linear_regression": Pipeline([("sc", StandardScaler()), ("m", LinearRegression())]),
+        "ridge_regression":  ridge(),
+        "random_forest": RandomForestRegressor(n_estimators=int(rf.get("n_estimators",200)),
+                            max_depth=rf.get("max_depth",6), random_state=seed, n_jobs=-1),
+        "xgboost": XGBRegressor(n_estimators=int(xgb.get("n_estimators",200)),
                     max_depth=int(xgb.get("max_depth",4)),
                     learning_rate=float(xgb.get("learning_rate",0.08)),
                     subsample=float(xgb.get("subsample",0.8)),
                     colsample_bytree=float(xgb.get("colsample_bytree",0.8)),
                     min_child_weight=int(xgb.get("min_child_weight",2)),
-                    random_state=42, verbosity=0),
+                    random_state=seed, verbosity=0),
+        "clip_ridge":   ridge(),
+        "hybrid_ridge": ridge(),
     }
 
 
@@ -84,96 +126,123 @@ def plot_importance(model, feat_names, path, title):
 
 def plot_scatter(y_true, preds, path):
     """Scatter plot of predicted vs actual scores for all models."""
-    fig, axes = plt.subplots(1, len(preds), figsize=(5*len(preds), 4), squeeze=False)
+    fig, axes = plt.subplots(1, len(preds), figsize=(4.2*len(preds), 4), squeeze=False)
     for ax, (name, yp) in zip(axes[0], preds.items()):
-        ax.scatter(y_true, yp, alpha=0.6, s=40, edgecolors="none")
-        mn, mx = min(y_true.min(), yp.min())-0.2, max(y_true.max(), yp.max())+0.2
-        ax.plot([mn,mx],[mn,mx],"--", color="gray", lw=1)
-        ax.set_title(f"{name}\nMAE={mean_absolute_error(y_true,yp):.3f}  R²={r2_score(y_true,yp):.3f}", fontsize=9)
-        ax.set_xlabel("Actual"); ax.set_ylabel("Predicted")
+        ax.scatter(y_true, yp, alpha=0.5, s=30, edgecolors="none")
+        ax.plot([1, 5], [1, 5], "--", color="gray", lw=1)
+        ax.set_xlim(0.8, 5.2); ax.set_ylim(0.8, 5.2)
+        ax.set_title(f"{name}\nMAE={mean_absolute_error(y_true,yp):.3f}  ρ={spearmanr(y_true,yp)[0]:.3f}", fontsize=9)
+        ax.set_xlabel("Rated"); ax.set_ylabel("Predicted")
         ax.grid(alpha=0.3)
-    fig.suptitle("Predicted vs Actual", fontsize=12)
+    fig.suptitle("Predicted vs Rated (out-of-fold)", fontsize=12)
     plt.tight_layout(); path.parent.mkdir(parents=True, exist_ok=True)
     plt.savefig(path, dpi=120, bbox_inches="tight"); plt.close()
     log.info("✓ Scatter chart → %s", path)
 
-def plot_comparison(results, path):
-    """Bar chart comparing key metrics across all 4 models."""
-    met   = ["MAE", "RMSE", "R2", "Pearson_r"]
-    names = list(results.keys())
-    x, w  = np.arange(len(met)), 0.8/len(names)
-    fig, ax = plt.subplots(figsize=(11, 5))
-    for i, name in enumerate(names):
-        vals   = [results[name][m] for m in met]
-        offset = (i - len(names)/2 + 0.5) * w
-        ax.bar(x+offset, vals, w*0.9, label=name, alpha=0.85, edgecolor="none")
-    ax.set_xticks(x); ax.set_xticklabels(met)
-    ax.set_title("Model Comparison — Test Set")
-    ax.legend(); ax.grid(axis="y", alpha=0.3)
+def plot_comparison(results, target, path):
+    """Bar chart of CV MAE and Spearman-ρ (mean ± std) for every model on one target."""
+    r = results[results["target"] == target].set_index("model")
+    keys = [k for k in MODEL_INFO if k in r.index]
+    names = [MODEL_INFO[k][0] for k in keys]
+    fig, axes = plt.subplots(1, 2, figsize=(13, 4.5))
+    for ax, met in zip(axes, ["MAE", "Spearman_r"]):
+        vals = np.nan_to_num(r.loc[keys, f"{met}_mean"].values)
+        errs = np.nan_to_num(r.loc[keys, f"{met}_std"].values)
+        colors = ["#9aa0a6" if k == "dummy_mean" else "#4c72b0" if MODEL_INFO[k][1] == "detection" else "#dd8452" for k in keys]
+        ax.barh(names, vals, xerr=errs, color=colors, capsize=3, edgecolor="none")
+        ax.invert_yaxis(); ax.grid(axis="x", alpha=0.3)
+        ax.set_title(f"{met} — {target} (lower is better)" if met == "MAE" else f"{met} — {target} (higher is better)", fontsize=10)
+    fig.suptitle("Repeated K-fold CV (mean ± std). Blue = YOLO features, orange = CLIP embeddings", fontsize=11)
     plt.tight_layout(); path.parent.mkdir(parents=True, exist_ok=True)
     plt.savefig(path, dpi=120, bbox_inches="tight"); plt.close()
     log.info("✓ Comparison chart → %s", path)
 
 
-def train_and_evaluate(features_path, labels_path, models_dir, outputs_dir, config):
-    """Train every model, print results, save models and charts."""
-    cfg    = config.get("model", {})
-    target = cfg.get("target_column", "overall_score")
-    X, y, feat_cols = load_data(features_path, labels_path, target)
-    log.info("Target: %s | %d features | %d samples", target, len(feat_cols), len(X))
+def train_and_evaluate(features_path, embeddings_path, labels_path, models_dir, outputs_dir, config):
+    """Cross-validate every model on every target, print results, refit on all data, save models and charts."""
+    cfg      = config.get("model", {})
+    primary  = cfg.get("target_column", "overall_score")
+    targets  = cfg.get("targets", [primary])
+    seed     = int(cfg.get("random_state", 42))
+    folds    = int(cfg.get("cv_folds", 5))
+    repeats  = int(cfg.get("cv_repeats", 5))
+    labels, X = load_data(features_path, embeddings_path, labels_path)
+    log.info("%d images | targets: %s | %d×%d-fold CV", len(labels), targets, repeats, folds)
 
-    X_tr, X_te, y_tr, y_te = train_test_split(X, y, test_size=float(cfg.get("test_size",0.20)), random_state=42)
-    log.info("Train: %d  Test: %d", len(X_tr), len(X_te))
+    rkf, rows, oof = RepeatedKFold(n_splits=folds, n_repeats=repeats, random_state=seed), [], {}
+    for target in targets:
+        y = labels[target].astype(float)
+        (models_dir/target).mkdir(parents=True, exist_ok=True)
+        for key, est in make_models(config, seed).items():
+            Xs = X[MODEL_INFO[key][1]]
+            fold_scores = []
+            for tr, te in rkf.split(Xs):
+                m = clone(est).fit(Xs.iloc[tr], y.iloc[tr])
+                fold_scores.append(metrics(y.iloc[te].values, m.predict(Xs.iloc[te])))
+            fs = pd.DataFrame(fold_scores)
+            rows.append({"target": target, "model": key, "feature_set": MODEL_INFO[key][1],
+                         **{f"{c}_mean": fs[c].mean() for c in fs.columns},
+                         **{f"{c}_std":  fs[c].std()  for c in fs.columns}})
+            if target == primary:   # one K-fold pass of out-of-fold predictions for plots and the CLIP comparison
+                oof[key] = cross_val_predict(clone(est), Xs, y, cv=KFold(folds, shuffle=True, random_state=seed))
 
-    models_dir.mkdir(parents=True, exist_ok=True)
-    models, results, preds = make_models(config), {}, {}
+            if key == "dummy_mean":
+                continue
+            est.fit(Xs, y)   # final model is refit on all labelled data
+            joblib.dump({"model": est, "feature_set": MODEL_INFO[key][1], "feature_cols": list(Xs.columns),
+                         "target": target}, models_dir/target/f"{key}.joblib")
+        log.info("✓ %s: models saved → %s", target, models_dir/target)
 
-    for name, est in models.items():
-        log.info("Training %s…", name)
-        est.fit(X_tr, y_tr)
-        yp = np.clip(est.predict(X_te), 1.0, 5.0)
-        cv_mae = -cross_val_score(est, X_tr, y_tr, cv=5, scoring="neg_mean_absolute_error", n_jobs=-1).mean()
-        results[name] = {**metrics(y_te.values, yp), "CV_MAE": round(cv_mae, 4)}
-        preds[name]   = yp
-        safe = name.lower().replace(" ", "_")
-        joblib.dump({"model": est, "feature_cols": feat_cols, "target": target}, models_dir/f"{safe}.joblib")
-        log.info("  ✓ Saved → %s", models_dir/f"{safe}.joblib")
+    results = pd.DataFrame(rows)
+    outputs_dir.mkdir(parents=True, exist_ok=True)
+    results.to_csv(outputs_dir/"cv_results.csv", index=False)
 
-    # Print summary table
-    print("\n" + "-"*70)
-    print(f"{'Model':<22}{'MAE':>6}{'RMSE':>7}{'R2':>7}{'Pearson-r':>10}{'CV-MAE':>8}")
-    print("-"*70)
-    for name, m in results.items():
-        print(f"{name:<22}{m['MAE']:>6.3f}{m['RMSE']:>7.3f}{m['R2']:>7.3f}{m['Pearson_r']:>10.3f}{m['CV_MAE']:>8.3f}")
-    print("-"*70)
-    log.info("Best: %s (MAE=%.3f)", min(results, key=lambda n: results[n]["MAE"]),
-             min(m["MAE"] for m in results.values()))
+    # Print summary tables
+    cols = ["MAE", "RMSE", "R2", "Spearman_r", "Kendall_t"]
+    for target in targets:
+        r = results[results["target"] == target]
+        print(f"\n{target}\n" + "-"*104)
+        print(f"{'Model':<29}" + "".join(f"{c:>15}" for c in cols))
+        print("-"*104)
+        for _, row in r.iterrows():
+            print(f"{MODEL_INFO[row['model']][0]:<29}" + "".join(f"{row[c+'_mean']:>8.3f} ±{row[c+'_std']:>5.3f}" for c in cols))
+        best = r[r["model"] != "dummy_mean"].sort_values("MAE_mean").iloc[0]
+        dummy = r[r["model"] == "dummy_mean"].iloc[0]
+        log.info("Best for %s: %s (CV MAE=%.3f vs dummy %.3f)", target, MODEL_INFO[best["model"]][0],
+                 best["MAE_mean"], dummy["MAE_mean"])
+    log.info("✓ CV results → %s", outputs_dir/"cv_results.csv")
 
-    # Save charts
-    for name, est in models.items():
-        raw = est.steps[-1][1] if hasattr(est, "steps") else est
-        plot_importance(raw, feat_cols, outputs_dir/f"feature_importance_{name.lower().replace(' ','_')}.png", name)
-    plot_scatter(y_te.values, preds, outputs_dir/"predicted_vs_actual.png")
-    plot_comparison(results, outputs_dir/"model_comparison.png")
+    oof_df = pd.DataFrame({"filename": labels["filename"], primary: labels[primary].values, **oof})
+    oof_df.to_csv(outputs_dir/"oof_predictions.csv", index=False)
+    log.info("✓ Out-of-fold predictions → %s", outputs_dir/"oof_predictions.csv")
+
+    # Charts for the primary target
+    for key in ["random_forest", "xgboost"]:
+        payload = joblib.load(models_dir/primary/f"{key}.joblib")
+        plot_importance(payload["model"], payload["feature_cols"],
+                        outputs_dir/f"feature_importance_{key}.png", f"{MODEL_INFO[key][0]} — {primary}")
+    plot_scatter(labels[primary].values,
+                 {MODEL_INFO[k][0]: oof[k] for k in ["ridge_regression", "xgboost", "clip_ridge", "hybrid_ridge"]},
+                 outputs_dir/"predicted_vs_actual.png")
+    plot_comparison(results, primary, outputs_dir/"model_comparison.png")
     return results
 
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument("--features", type=Path); p.add_argument("--labels", type=Path)
-    p.add_argument("--target",   type=str);  p.add_argument("--config", type=Path)
+    p.add_argument("--features",   type=Path); p.add_argument("--embeddings", type=Path)
+    p.add_argument("--labels",     type=Path); p.add_argument("--config",     type=Path)
     args = p.parse_args()
 
     config = load_config(args.config)
     paths  = config.get("paths", {})
-    if args.target:
-        config.setdefault("model", {})["target_column"] = args.target
     train_and_evaluate(
-        features_path = args.features or ROOT / paths.get("features_csv", "features/features.csv"),
-        labels_path   = args.labels   or ROOT / paths.get("labels_csv",   "data/labels.csv"),
-        models_dir    = ROOT / paths.get("models_dir",  "models"),
-        outputs_dir   = ROOT / paths.get("outputs_dir", "outputs"),
-        config        = config,
+        features_path   = args.features   or ROOT / paths.get("features_csv",   "features/features.csv"),
+        embeddings_path = args.embeddings or ROOT / paths.get("embeddings_npz", "features/clip_embeddings.npz"),
+        labels_path     = args.labels     or ROOT / paths.get("labels_csv",     "data/labels.csv"),
+        models_dir      = ROOT / paths.get("models_dir",  "models"),
+        outputs_dir     = ROOT / paths.get("outputs_dir", "outputs"),
+        config          = config,
     )
 
 if __name__ == "__main__":

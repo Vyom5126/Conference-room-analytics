@@ -130,7 +130,7 @@ def main() -> None:
         description="Generate ground-truth labels CSV for conference room images."
     )
     parser.add_argument("--images-dir", type=Path, default=ROOT / "data" / "images")
-    parser.add_argument("--output", type=Path, default=ROOT / "data" / "labels.csv")
+    parser.add_argument("--output", type=Path, default=ROOT / "data" / "labels_demo.csv")
     parser.add_argument("--seed", type=int, default=42, help="Random seed")
     parser.add_argument("--open-for-edit", action="store_true",
                         help="Open the CSV in default editor after generating")

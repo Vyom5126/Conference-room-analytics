@@ -3,10 +3,14 @@ clip_baseline.py
 Score images using CLIP (zero-shot, no training needed) and compare
 how well it ranks rooms against our trained XGBoost pipeline.
 
-CLIP works by comparing each image to two text descriptions:
-  - Positive: "a clean, organized conference room…"
-  - Negative: "a messy, cluttered conference room…"
-The score is how well the image matches the positive description.
+CLIP compares each image to an ensemble of positive ("clean, tidy room…")
+and negative ("messy, cluttered room…") prompts. The score is the mean
+positive logit minus the mean negative logit. Unlike a 2-way softmax this
+does not saturate near 1.0, so rankings stay informative.
+
+The trained models are compared using out-of-fold predictions written by
+score.py (outputs/oof_predictions.csv), so no model is scored on images it
+was trained on. Zero-shot CLIP uses no labels at all.
 
 Usage:
     python src/clip_baseline.py
@@ -17,6 +21,7 @@ from pathlib import Path
 import numpy as np, pandas as pd
 import matplotlib; matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from score import MODEL_INFO
 from utils import ROOT, load_config
 
 warnings.filterwarnings("ignore")
@@ -38,16 +43,16 @@ def load_clip(model_name):
 
 def clip_score(img_path, model, processor, pos, neg):
     """
-    Return a 0-1 score for how well the image matches the positive text description.
-    Uses CLIP's softmax over [positive, negative] similarity logits.
+    Return mean(positive-prompt logits) − mean(negative-prompt logits) for one image.
+    Higher = looks more like the positive descriptions.
     """
     import torch
     from PIL import Image
-    inputs = processor(text=[pos, neg], images=Image.open(img_path).convert("RGB"),
+    inputs = processor(text=list(pos) + list(neg), images=Image.open(img_path).convert("RGB"),
                        return_tensors="pt", padding=True)
     with torch.no_grad():
-        logits = model(**inputs).logits_per_image  
-    return float(logits.softmax(dim=1).squeeze()[0].item())
+        logits = model(**inputs).logits_per_image.squeeze(0)
+    return float(logits[:len(pos)].mean() - logits[len(pos):].mean())
 
 def score_all(images_dir, labels_df, model, processor, pos, neg):
     """Compute CLIP scores for every labelled image. Returns a DataFrame."""
@@ -60,59 +65,48 @@ def score_all(images_dir, labels_df, model, processor, pos, neg):
             if not hits: log.warning("Skipping (not found): %s", fname); continue
             img = hits[0]
         try:
-            rows.append({"filename": fname, "clip_score_raw": clip_score(img, model, processor, pos, neg)})
+            rows.append({"filename": fname, "clip_score": clip_score(img, model, processor, pos, neg)})
         except Exception as e:
             log.warning("Failed %s: %s", fname, e)
     return pd.DataFrame(rows)
 
 
-def compare(clip_df, labels_df, features_path, models_dir, config, outputs_dir):
-    """Compare CLIP and pipeline ranking. Print table, save charts."""
-    import joblib
+def compare(clip_df, labels_df, oof_path, config, outputs_dir):
+    """Compare CLIP and out-of-fold pipeline rankings. Print table, save charts."""
     from scipy.stats import pearsonr, spearmanr
 
     target = config.get("model", {}).get("target_column", "overall_score")
-
-    # Try to load pipeline (XGBoost) predictions for comparison
-    pipe_scores = None
-    if features_path.exists():
-        feat  = pd.read_csv(features_path)
-        mpath = models_dir / "xgboost.joblib"
-        if mpath.exists():
-            p = joblib.load(mpath)
-            X = feat.merge(labels_df[["filename"]], on="filename")
-            pipe_scores = pd.DataFrame({
-                "filename":       X["filename"].values,
-                "pipeline_score": np.clip(p["model"].predict(X[[c for c in p["feature_cols"] if c in X.columns]].fillna(0.0)), 1.0, 5.0),
-            })
-
-    # Rescale CLIP's raw 0-1 scores to 1-5 for a fair comparison
     merged = clip_df.merge(labels_df[["filename", target]], on="filename")
-    raw    = merged["clip_score_raw"].values
+    model_cols = []
+    if oof_path.exists():
+        # Same images for every method: the OOF file already excludes flagged images
+        oof = pd.read_csv(oof_path)
+        model_cols = [c for c in oof.columns if c not in ("filename", target) and not c.startswith("dummy")]
+        merged = merged.merge(oof[["filename"] + model_cols], on="filename")
+    else:
+        log.warning("No %s — run score.py first to compare against the pipeline.", oof_path)
+
+    raw = merged["clip_score"].values
+    # Linear rescale to 1-5 for plotting only (rank metrics are unaffected)
     merged["clip_1_5"] = 1 + (raw - raw.min()) / (raw.max() - raw.min() + 1e-9) * 4
-    if pipe_scores is not None:
-        merged = merged.merge(pipe_scores, on="filename", how="left")
 
     y = merged[target].values
-    cs, _ = spearmanr(y, merged["clip_1_5"].values)
-    cp, _ = pearsonr(y,  merged["clip_1_5"].values)
+    corr = {"CLIP (zero-shot)": (spearmanr(y, raw)[0], pearsonr(y, raw)[0])}
+    for c in model_cols:
+        corr[f"{MODEL_INFO[c][0] if c in MODEL_INFO else c} (OOF)"] = (spearmanr(y, merged[c])[0], pearsonr(y, merged[c])[0])
+    log.info("Comparing on %d images", len(merged))
 
-    print("\n" + "-"*50)
-    print(f"{'Method':<24}{'Spearman-rho':>12}{'Pearson r':>12}")
-    print("-"*50)
-    print(f"{'CLIP (zero-shot)':<24}{cs:>12.3f}{cp:>12.3f}")
-    ps = pp = None
-    if pipe_scores is not None and "pipeline_score" in merged.columns:
-        v = merged.dropna(subset=["pipeline_score"])
-        if len(v) >= 3:
-            ps,_ = spearmanr(v[target].values, v["pipeline_score"].values)
-            pp,_ = pearsonr(v[target].values,  v["pipeline_score"].values)
-            print(f"{'Engineered Pipeline':<24}{ps:>12.3f}{pp:>12.3f}")
-    print("-"*50 + "\n")
+    print("\n" + "-"*58)
+    print(f"{'Method':<32}{'Spearman-rho':>13}{'Pearson r':>13}")
+    print("-"*58)
+    for name, (sp, pe) in corr.items():
+        print(f"{name:<32}{sp:>13.3f}{pe:>13.3f}")
+    print("-"*58)
+    print("Labels: AI-judge ratings (data/rating_rubric.md). Trained models use out-of-fold predictions.\n")
 
     _plot_scatter(merged, y, target, outputs_dir)
-    if ps is not None:
-        _plot_bars({"CLIP":(cs,cp),"Pipeline":(ps,pp)}, outputs_dir)
+    _plot_bars(corr, outputs_dir)
+    return corr
 
 
 def _plot_scatter(df, y, target, out_dir):
@@ -135,15 +129,16 @@ def _plot_scatter(df, y, target, out_dir):
     log.info("✓ CLIP scatter → %s", out)
 
 def _plot_bars(corr, out_dir):
-    """Bar chart of Spearman rho and Pearson r for CLIP vs. Pipeline."""
+    """Bar chart of Spearman rho and Pearson r for CLIP vs. pipeline models."""
     methods = list(corr.keys())
     x, w = np.arange(len(methods)), 0.35
-    fig, ax = plt.subplots(figsize=(7, 4))
+    fig, ax = plt.subplots(figsize=(max(7, 2*len(methods)), 4))
     ax.bar(x-w/2, [corr[m][0] for m in methods], w, label="Spearman rho", alpha=0.85, edgecolor="none")
     ax.bar(x+w/2, [corr[m][1] for m in methods], w, label="Pearson r",    alpha=0.85, edgecolor="none")
-    ax.set_xticks(x); ax.set_xticklabels(methods)
-    ax.set_ylabel("Correlation"); ax.set_ylim(0, 1.15)
-    ax.set_title("CLIP vs Pipeline — Ranking Correlation")
+    ax.set_xticks(x); ax.set_xticklabels(methods, fontsize=8)
+    ax.set_ylabel("Correlation"); ax.set_ylim(min(0, *[v for c in corr.values() for v in c]) - 0.05, 1.15)
+    ax.axhline(0, color="gray", lw=0.8)
+    ax.set_title("CLIP vs Pipeline (out-of-fold) — Ranking Correlation")
     ax.legend(); ax.grid(axis="y", alpha=0.3)
     plt.tight_layout(); out = out_dir/"clip_vs_pipeline.png"
     plt.savefig(out, dpi=120, bbox_inches="tight"); plt.close()
@@ -161,8 +156,6 @@ def main():
 
     images_dir    = args.images_dir or ROOT / paths.get("images_dir",   "data/images")
     labels_path   = args.labels     or ROOT / paths.get("labels_csv",   "data/labels.csv")
-    features_path = ROOT / paths.get("features_csv", "features/features.csv")
-    models_dir    = ROOT / paths.get("models_dir",   "models")
     outputs_dir   = ROOT / paths.get("outputs_dir",  "outputs")
 
     if not labels_path.exists():
@@ -173,8 +166,7 @@ def main():
 
     model, proc = load_clip(clip_cfg.get("model_name", "openai/clip-vit-base-patch32"))
     clip_df = score_all(images_dir, labels_df, model, proc,
-                        clip_cfg.get("positive_prompt","a clean, organized, professional conference room with neatly arranged chairs"),
-                        clip_cfg.get("negative_prompt","a messy, cluttered, disorganized conference room with objects scattered"))
+                        clip_cfg["positive_prompts"], clip_cfg["negative_prompts"])
 
     if clip_df.empty:
         log.error("No CLIP scores — check image paths."); sys.exit(1)
@@ -182,7 +174,7 @@ def main():
     out = outputs_dir/"clip_scores.csv"
     out.parent.mkdir(parents=True, exist_ok=True)
     clip_df.to_csv(out, index=False); log.info("✓ Scores → %s", out)
-    compare(clip_df, labels_df, features_path, models_dir, config, outputs_dir)
+    compare(clip_df, labels_df, outputs_dir/"oof_predictions.csv", config, outputs_dir)
 
 if __name__ == "__main__":
     main()

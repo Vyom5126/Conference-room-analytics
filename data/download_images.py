@@ -36,6 +36,8 @@ ROOT = Path(__file__).resolve().parent.parent
 # Mix of clean/organised and messy/cluttered conference rooms from
 # Unsplash (free to use), Wikimedia Commons (CC), and Pexels (free license).
 # Each entry: (url, local_filename)
+# Two URLs that appeared under conflicting categories (clean_room_09 = messy_room_06,
+# medium_room_17 = messy_room_02) were removed: their true category is unknown.
 IMAGE_SOURCES: list[tuple[str, str]] = [
     # ── Clean / Professional rooms ──────────────────────────────────────────
     ("https://images.unsplash.com/photo-1497366216548-37526070297c?w=1200&q=80", "clean_room_01.jpg"),
@@ -46,7 +48,6 @@ IMAGE_SOURCES: list[tuple[str, str]] = [
     ("https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=1200&q=80", "clean_room_06.jpg"),
     ("https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=1200&q=80", "clean_room_07.jpg"),
     ("https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=1200&q=80", "clean_room_08.jpg"),
-    ("https://images.unsplash.com/photo-1568992687947-868a62a9f521?w=1200&q=80", "clean_room_09.jpg"),
     ("https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=1200&q=80", "clean_room_10.jpg"),
     ("https://images.unsplash.com/photo-1573165231977-3f0e27806045?w=1200&q=80", "clean_room_11.jpg"),
     ("https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=1200&q=80", "clean_room_12.jpg"),
@@ -76,7 +77,6 @@ IMAGE_SOURCES: list[tuple[str, str]] = [
     ("https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=1200&q=80", "medium_room_14.jpg"),
     ("https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=1200&q=80", "medium_room_15.jpg"),
     ("https://images.unsplash.com/photo-1590402494682-cd3fb53b1f70?w=1200&q=80", "medium_room_16.jpg"),
-    ("https://images.unsplash.com/photo-1588196749597-9ff075ee6b5b?w=1200&q=80", "medium_room_17.jpg"),
     ("https://images.unsplash.com/photo-1565301660306-29e08751cc53?w=1200&q=80", "medium_room_18.jpg"),
     ("https://images.unsplash.com/photo-1581090464777-f3220bbe1b8b?w=1200&q=80", "medium_room_19.jpg"),
     ("https://images.unsplash.com/photo-1556742400-b5b7c512047a?w=1200&q=80", "medium_room_20.jpg"),
@@ -95,11 +95,9 @@ IMAGE_SOURCES: list[tuple[str, str]] = [
 
     # ── Messy / post-meeting ────────────────────────────────────────────────
     ("https://images.unsplash.com/photo-1572021335469-31706a17aaef?w=1200&q=80", "messy_room_01.jpg"),
-    ("https://images.unsplash.com/photo-1588196749597-9ff075ee6b5b?w=1200&q=80", "messy_room_02.jpg"),
     ("https://images.unsplash.com/photo-1610416900944-50e9bfb73770?w=1200&q=80", "messy_room_03.jpg"),
     ("https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&q=80", "messy_room_04.jpg"),
     ("https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=1200&q=80", "messy_room_05.jpg"),
-    ("https://images.unsplash.com/photo-1568992687947-868a62a9f521?w=1200&q=80", "messy_room_06.jpg"),
     ("https://images.unsplash.com/photo-1531545514256-b1400bc00f31?w=1200&q=80", "messy_room_07.jpg"),
     ("https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=1200&q=80", "messy_room_08.jpg"),
     ("https://images.unsplash.com/photo-1606857521015-7f9fcf423740?w=1200&q=80", "messy_room_09.jpg"),
@@ -206,7 +204,7 @@ def main() -> None:
         )
     else:
         log.info(
-            "✓ Ready! Run 'python data/generate_labels.py' to create labels.csv"
+            "✓ Ready! Run 'python data/generate_labels.py' to create labels_demo.csv"
         )
 
 

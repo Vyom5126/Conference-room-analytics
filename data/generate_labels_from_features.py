@@ -1,14 +1,21 @@
 """
 generate_labels_from_features.py
 ─────────────────────────────────
-Generates realistic ground-truth labels directly from computed features,
-simulating how a human rater would score conference rooms.
+Generates SYNTHETIC proxy labels directly from computed features.
 
-Scoring formula (mirrors real human judgment):
-  cleanliness   ← weighted combo of clutter_density, floor_occupancy_ratio,
+WARNING — these are not human judgments. The labels are a deterministic
+function of the same features the models are trained on (plus seeded noise),
+so model metrics on them only show that a regressor can recover this formula.
+They say nothing about how well the system judges real room quality.
+
+Kept for reference only: output goes to data/labels_synthetic.csv. The labels
+the models train on are data/labels.csv, rated per data/rating_rubric.md.
+
+Scoring formula (hand-picked weights, min-max scaled over the current dataset):
+  cleanliness   ← weighted combo of clutter_area_frac, floor_occupancy_ratio,
                    table_surface_occupancy (inverse)
   chair_align   ← chair_spacing_variance, chair_aspect_ratio_variance (inverse)
-  clutter_score ← clutter_object_count, clutter_density (inverse)
+  clutter_score ← clutter_object_count, clutter_area_frac (inverse)
   overall       ← weighted average of above + noise
 
 All scores are on a 1–5 scale. A small Gaussian noise term (σ≈0.35)
@@ -38,10 +45,10 @@ ROOT = Path(__file__).resolve().parent.parent
 
 
 def sigmoid_scale(x: np.ndarray, lo: float = 0.0, hi: float = 1.0) -> np.ndarray:
-    """Map array to [0,1] using min-max, then to [1,5] linearly."""
+    """Map array to [0,1] using min-max (constant input → 0.5)."""
     rng = hi - lo
     if rng == 0:
-        return np.full_like(x, 3.0)
+        return np.full_like(x, 0.5, dtype=float)
     normed = (x - lo) / rng
     return np.clip(normed, 0, 1)
 
@@ -53,13 +60,14 @@ def generate_feature_based_labels(
     noise_std: float = 0.35,
 ) -> pd.DataFrame:
     """
-    Derive human-style quality labels from YOLO-computed features.
+    Derive synthetic quality labels from YOLO-computed features.
 
-    The mapping intentionally mimics what a human rater sees:
+    The mapping encodes these assumptions:
       - More clutter → lower cleanliness & clutter scores
       - High chair spacing variance → lower chair alignment score
       - High table surface occupancy → lower cleanliness
-      - Person present is neutral (active use, not disorder)
+      - Person present lowers overall by 0.10
+      - Overall weights sum to 0.90, so overall rarely exceeds 4.5
     """
     rng = np.random.default_rng(seed)
     df = pd.read_csv(features_path)
@@ -79,7 +87,7 @@ def generate_feature_based_labels(
 
     # ── Cleanliness Score ─────────────────────────────────────────────────────
     # High clutter density, floor occupancy, and table occupancy → low score
-    clutter_dens   = df["clutter_density"].values
+    clutter_dens   = df["clutter_area_frac"].values
     floor_occ      = df["floor_occupancy_ratio"].values
     table_occ      = df["table_surface_occupancy"].values
 
@@ -158,7 +166,7 @@ def generate_feature_based_labels(
     print("\n-- Key Feature-Label Correlations -----------------------")
     checks = [
         ("clutter_object_count", "clutter_score"),
-        ("clutter_density",      "cleanliness_score"),
+        ("clutter_area_frac",      "cleanliness_score"),
         ("chair_spacing_variance", "chair_alignment_score"),
         ("table_surface_occupancy", "cleanliness_score"),
         ("floor_occupancy_ratio", "cleanliness_score"),
@@ -180,7 +188,7 @@ def main() -> None:
     parser.add_argument("--features", type=Path,
                         default=ROOT / "features" / "features.csv")
     parser.add_argument("--output",   type=Path,
-                        default=ROOT / "data" / "labels.csv")
+                        default=ROOT / "data" / "labels_synthetic.csv")
     parser.add_argument("--seed",     type=int, default=42)
     parser.add_argument("--noise",    type=float, default=0.35,
                         help="Gaussian noise std for inter-rater variability")

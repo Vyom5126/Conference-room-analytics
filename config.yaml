@@ -3,9 +3,10 @@
 # Paths
 paths:
   images_dir: "data/images"
-  labels_csv: "data/labels.csv"
+  labels_csv: "data/labels.csv"               # AI-rated labels (see data/rating_rubric.md)
   detections_dir: "outputs/detections"
   features_csv: "features/features.csv"
+  embeddings_npz: "features/clip_embeddings.npz"
   models_dir: "models"
   outputs_dir: "outputs"
 
@@ -28,6 +29,9 @@ detection:
     - cell phone
     - remote
     - book
+    - keyboard
+    - mouse
+    - tv
 
 # Feature engineering
 features:
@@ -40,15 +44,31 @@ features:
     - cell phone
     - remote
     - book
-  furniture_classes:
+    - keyboard
+    - mouse
+  furniture_classes:                # fixtures: never counted as clutter / floor / table items
     - chair
     - dining table
+    - tv
   floor_region_fraction: 0.45       # bottom fraction considered "floor"
+
+# Image embeddings (main model input)
+embedding:
+  model_name: "openai/clip-vit-base-patch32"
+  batch_size: 16
 
 # Model training
 model:
-  target_column: "overall_score"
-  test_size: 0.20
+  target_column: "overall_score"    # primary target: charts, OOF predictions, CLIP comparison
+  targets:                          # every target gets its own models
+    - overall_score
+    - cleanliness_score
+    - chair_alignment_score
+    - clutter_score
+  default_model: "clip_ridge"       # used by evaluate.py and the Streamlit app
+  ridge_alphas: [0.01, 0.1, 1, 10, 100, 1000, 10000]
+  cv_folds: 5                       # K-fold CV (repeated) — replaces the old single 80/20 split
+  cv_repeats: 5
   random_state: 42
   xgboost:
     n_estimators: 200
@@ -65,8 +85,17 @@ model:
 # CLIP baseline
 clip:
   model_name: "openai/clip-vit-base-patch32"
-  positive_prompt: "a clean, organized, professional conference room with neatly arranged chairs and a tidy table"
-  negative_prompt: "a messy, cluttered, disorganized conference room with chairs out of place and objects scattered"
+  # Score = mean(positive logits) − mean(negative logits); ensembles reduce single-prompt noise
+  positive_prompts:
+    - "a clean, organized, professional conference room with neatly arranged chairs and a tidy table"
+    - "a photo of a tidy, empty meeting room ready for a meeting"
+    - "a conference room with chairs pushed in and a clear table"
+    - "a neat and well-kept office meeting room"
+  negative_prompts:
+    - "a messy, cluttered, disorganized conference room with chairs out of place and objects scattered"
+    - "a photo of a meeting room with papers, cups and trash left on the table"
+    - "a conference room with chairs scattered around after a meeting"
+    - "an untidy, dirty office meeting room"
 
 # Visualization (bounding box colors for evaluate.py)
 visualization:

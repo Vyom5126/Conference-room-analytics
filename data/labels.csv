@@ -1,301 +1,301 @@
-filename,cleanliness_score,chair_alignment_score,clutter_score,overall_score
-sun397_conf_0000.jpg,5.0,5.0,5.0,4.5
-sun397_conf_0001.jpg,4.6,4.0,4.8,4.0
-sun397_conf_0002.jpg,5.0,4.2,5.0,4.5
-sun397_conf_0003.jpg,5.0,4.4,4.8,4.5
-sun397_conf_0004.jpg,4.3,4.0,4.8,4.0
-sun397_conf_0005.jpg,4.5,3.9,5.0,4.5
-sun397_conf_0006.jpg,5.0,4.2,5.0,4.5
-sun397_conf_0007.jpg,3.4,4.4,3.2,3.0
-sun397_conf_0008.jpg,4.9,4.4,4.1,4.0
-sun397_conf_0009.jpg,4.7,5.0,5.0,4.0
-sun397_conf_0010.jpg,5.0,4.8,4.6,4.0
-sun397_conf_0011.jpg,5.0,5.0,5.0,4.5
-sun397_conf_0012.jpg,5.0,5.0,4.5,4.5
-sun397_conf_0013.jpg,5.0,4.3,5.0,4.0
-sun397_conf_0014.jpg,4.9,4.6,4.2,4.5
-sun397_conf_0015.jpg,4.7,4.4,4.6,4.5
-sun397_conf_0016.jpg,5.0,4.5,5.0,4.5
-sun397_conf_0017.jpg,4.7,4.4,5.0,4.5
-sun397_conf_0018.jpg,5.0,4.7,4.8,4.5
-sun397_conf_0019.jpg,4.8,3.8,4.7,3.5
-sun397_conf_0020.jpg,4.9,4.6,4.8,4.5
-sun397_conf_0021.jpg,4.8,4.1,5.0,4.0
-sun397_conf_0022.jpg,5.0,5.0,5.0,4.5
-sun397_conf_0023.jpg,4.9,4.3,4.8,4.0
-sun397_conf_0024.jpg,4.5,4.8,4.0,4.0
-sun397_conf_0025.jpg,4.9,4.6,4.8,4.5
-sun397_conf_0026.jpg,5.0,4.4,4.9,4.5
-sun397_conf_0027.jpg,5.0,4.2,5.0,4.5
-sun397_conf_0028.jpg,5.0,4.4,4.6,4.0
-sun397_conf_0029.jpg,5.0,4.1,4.2,4.0
-sun397_conf_0030.jpg,5.0,5.0,5.0,4.5
-sun397_conf_0031.jpg,4.9,4.4,5.0,4.5
-sun397_conf_0032.jpg,4.8,3.8,4.9,4.5
-sun397_conf_0033.jpg,4.7,4.2,4.3,4.5
-sun397_conf_0034.jpg,5.0,4.4,4.9,4.5
-sun397_conf_0035.jpg,5.0,4.1,4.9,4.5
-sun397_conf_0036.jpg,3.9,4.2,4.9,3.5
-sun397_conf_0037.jpg,4.7,4.6,4.6,4.0
-sun397_conf_0038.jpg,4.7,4.4,5.0,4.5
-sun397_conf_0039.jpg,5.0,4.5,5.0,4.5
-sun397_conf_0040.jpg,5.0,3.7,4.5,4.0
-sun397_conf_0041.jpg,4.6,4.0,4.3,4.0
-sun397_conf_0042.jpg,3.7,5.0,4.9,4.0
-sun397_conf_0043.jpg,5.0,4.6,5.0,4.5
-sun397_conf_0044.jpg,5.0,4.7,4.9,4.5
-sun397_conf_0045.jpg,5.0,3.3,5.0,4.0
-sun397_conf_0046.jpg,5.0,4.1,5.0,4.5
-sun397_conf_0047.jpg,5.0,4.5,4.4,3.5
-sun397_conf_0048.jpg,5.0,4.0,5.0,4.5
-sun397_conf_0049.jpg,4.8,4.8,3.9,3.5
-sun397_conf_0050.jpg,5.0,5.0,5.0,4.0
-sun397_conf_0051.jpg,5.0,4.9,4.9,4.5
-sun397_conf_0052.jpg,4.5,4.0,5.0,4.0
-sun397_conf_0053.jpg,4.9,4.7,4.6,4.0
-sun397_conf_0054.jpg,4.8,4.6,5.0,4.0
-sun397_conf_0055.jpg,4.8,4.2,5.0,4.5
-sun397_conf_0056.jpg,4.5,3.1,3.5,3.0
-sun397_conf_0057.jpg,5.0,4.5,5.0,5.0
-sun397_conf_0058.jpg,4.7,4.1,5.0,4.0
-sun397_conf_0059.jpg,5.0,4.7,4.9,4.5
-sun397_conf_0060.jpg,3.1,3.8,2.7,3.0
-sun397_conf_0061.jpg,4.5,4.6,4.0,4.0
-sun397_conf_0062.jpg,5.0,4.8,4.7,4.0
-sun397_conf_0063.jpg,5.0,4.2,4.9,4.0
-sun397_conf_0064.jpg,5.0,4.2,5.0,4.5
-sun397_conf_0065.jpg,5.0,4.9,4.4,4.0
-sun397_conf_0066.jpg,4.9,4.4,4.4,4.0
-sun397_conf_0067.jpg,4.8,4.3,4.9,4.0
-sun397_conf_0068.jpg,5.0,4.6,4.8,4.5
-sun397_conf_0069.jpg,4.9,4.7,4.1,4.0
-sun397_conf_0070.jpg,4.5,4.6,5.0,4.0
-sun397_conf_0071.jpg,4.6,4.7,5.0,4.5
-sun397_conf_0072.jpg,4.7,5.0,4.8,4.5
-sun397_conf_0073.jpg,5.0,4.7,4.3,4.5
-sun397_conf_0074.jpg,4.7,4.6,4.5,4.0
-sun397_conf_0075.jpg,5.0,5.0,4.3,4.0
-sun397_conf_0076.jpg,4.9,4.2,5.0,4.5
-sun397_conf_0077.jpg,5.0,3.5,5.0,4.0
-sun397_conf_0078.jpg,5.0,4.6,5.0,4.0
-sun397_conf_0079.jpg,4.9,4.4,4.9,4.5
-sun397_conf_0080.jpg,5.0,4.9,5.0,4.5
-sun397_conf_0081.jpg,4.7,4.7,5.0,4.0
-sun397_conf_0082.jpg,4.0,3.5,5.0,3.5
-sun397_conf_0083.jpg,4.9,3.9,4.8,4.0
-sun397_conf_0084.jpg,4.6,3.7,4.8,4.0
-sun397_conf_0085.jpg,5.0,3.9,4.6,4.0
-sun397_conf_0086.jpg,4.8,4.7,5.0,4.0
-sun397_conf_0087.jpg,4.1,4.8,4.7,4.0
-sun397_conf_0088.jpg,5.0,4.8,4.5,4.0
-sun397_conf_0089.jpg,4.5,4.1,4.1,3.5
-sun397_conf_0090.jpg,5.0,3.8,5.0,4.5
-sun397_conf_0091.jpg,5.0,4.0,4.9,4.5
-sun397_conf_0092.jpg,4.9,4.2,5.0,4.5
-sun397_conf_0093.jpg,5.0,4.6,4.2,4.5
-sun397_conf_0094.jpg,4.4,4.8,4.7,4.0
-sun397_conf_0095.jpg,4.5,4.5,4.7,4.0
-sun397_conf_0096.jpg,4.5,5.0,4.2,4.5
-sun397_conf_0097.jpg,2.8,5.0,2.8,3.0
-sun397_conf_0098.jpg,5.0,5.0,4.7,4.5
-sun397_conf_0099.jpg,4.7,4.7,4.9,4.5
-sun397_conf_0100.jpg,4.9,4.4,5.0,4.5
-sun397_conf_0101.jpg,4.9,5.0,3.9,4.0
-sun397_conf_0102.jpg,4.9,4.6,4.6,4.0
-sun397_conf_0103.jpg,5.0,4.0,4.7,4.0
-sun397_conf_0104.jpg,2.5,5.0,3.3,3.0
-sun397_conf_0105.jpg,4.9,4.5,4.7,4.5
-sun397_conf_0106.jpg,4.7,4.7,4.7,4.5
-sun397_conf_0107.jpg,4.9,4.9,5.0,4.5
-sun397_conf_0108.jpg,5.0,3.9,4.9,4.5
-sun397_conf_0109.jpg,4.4,4.1,5.0,4.0
-sun397_conf_0110.jpg,5.0,4.2,5.0,4.0
-sun397_conf_0111.jpg,5.0,2.2,5.0,4.0
-sun397_conf_0112.jpg,4.8,4.4,4.6,4.0
-sun397_conf_0113.jpg,4.5,4.8,5.0,4.0
-sun397_conf_0114.jpg,5.0,4.2,4.9,4.0
-sun397_conf_0115.jpg,4.8,4.6,4.6,4.0
-sun397_conf_0116.jpg,5.0,4.7,4.5,4.5
-sun397_conf_0117.jpg,4.9,4.5,4.9,4.5
-sun397_conf_0118.jpg,5.0,4.6,4.9,4.5
-sun397_conf_0119.jpg,4.9,5.0,4.6,4.5
-sun397_conf_0120.jpg,3.8,4.5,3.7,3.5
-sun397_conf_0121.jpg,5.0,3.8,5.0,4.5
-sun397_conf_0122.jpg,5.0,3.7,4.2,4.0
-sun397_conf_0123.jpg,5.0,3.7,4.5,4.0
-sun397_conf_0124.jpg,4.7,3.9,4.0,3.5
-sun397_conf_0125.jpg,4.6,3.8,4.5,4.0
-sun397_conf_0126.jpg,5.0,4.8,5.0,4.0
-sun397_conf_0127.jpg,4.6,4.4,5.0,4.0
-sun397_conf_0128.jpg,4.7,3.7,4.4,4.0
-sun397_conf_0129.jpg,4.7,4.9,4.6,4.5
-sun397_conf_0130.jpg,4.6,3.7,4.9,4.0
-sun397_conf_0131.jpg,4.5,4.8,5.0,4.5
-sun397_conf_0132.jpg,5.0,4.4,5.0,4.5
-sun397_conf_0133.jpg,4.9,4.2,4.9,4.5
-sun397_conf_0134.jpg,4.2,5.0,3.8,3.5
-sun397_conf_0135.jpg,4.6,4.2,5.0,4.0
-sun397_conf_0136.jpg,4.5,4.5,4.5,4.0
-sun397_conf_0137.jpg,5.0,3.9,5.0,4.0
-sun397_conf_0138.jpg,5.0,4.0,4.4,4.5
-sun397_conf_0139.jpg,5.0,4.5,4.2,4.5
-sun397_conf_0140.jpg,4.6,4.5,4.2,3.5
-sun397_conf_0141.jpg,4.7,4.9,5.0,4.5
-sun397_conf_0142.jpg,4.2,4.4,4.4,4.0
-sun397_conf_0143.jpg,5.0,4.8,4.3,4.0
-sun397_conf_0144.jpg,4.7,4.6,5.0,4.0
-sun397_conf_0145.jpg,4.9,3.8,5.0,4.0
-sun397_conf_0146.jpg,4.8,4.9,5.0,4.5
-sun397_conf_0147.jpg,5.0,4.3,5.0,4.5
-sun397_conf_0148.jpg,5.0,4.8,4.6,4.0
-sun397_conf_0149.jpg,4.9,4.3,4.2,4.0
-sun397_conf_0150.jpg,4.9,4.5,4.6,4.0
-sun397_conf_0151.jpg,4.6,4.6,4.5,4.0
-sun397_conf_0152.jpg,4.4,5.0,4.6,4.0
-sun397_conf_0153.jpg,4.8,5.0,5.0,5.0
-sun397_conf_0154.jpg,5.0,4.8,5.0,4.0
-sun397_conf_0155.jpg,5.0,4.4,4.9,4.5
-sun397_conf_0156.jpg,5.0,5.0,4.7,4.5
-sun397_conf_0157.jpg,5.0,4.3,5.0,4.5
-sun397_conf_0158.jpg,4.8,1.8,5.0,3.5
-sun397_conf_0159.jpg,4.6,4.3,5.0,4.5
-sun397_conf_0160.jpg,1.9,4.5,2.6,2.5
-sun397_conf_0161.jpg,4.7,4.2,5.0,4.5
-sun397_conf_0162.jpg,5.0,3.2,5.0,4.0
-sun397_conf_0163.jpg,4.2,3.6,2.8,3.5
-sun397_conf_0164.jpg,5.0,3.9,5.0,4.0
-sun397_conf_0165.jpg,4.7,4.6,4.4,4.0
-sun397_conf_0166.jpg,5.0,4.2,5.0,4.0
-sun397_conf_0167.jpg,5.0,5.0,4.8,4.5
-sun397_conf_0168.jpg,4.9,5.0,4.6,4.5
-sun397_conf_0169.jpg,5.0,4.1,5.0,4.5
-sun397_conf_0170.jpg,4.8,4.6,5.0,4.5
-sun397_conf_0171.jpg,5.0,4.2,5.0,4.0
-sun397_conf_0172.jpg,4.8,4.7,5.0,4.5
-sun397_conf_0173.jpg,4.6,4.4,5.0,4.0
-sun397_conf_0174.jpg,4.6,4.8,5.0,4.0
-sun397_conf_0175.jpg,4.3,4.4,4.3,4.0
-sun397_conf_0176.jpg,5.0,5.0,4.6,4.5
-sun397_conf_0177.jpg,5.0,4.2,5.0,5.0
-sun397_conf_0178.jpg,4.3,4.4,5.0,4.0
-sun397_conf_0179.jpg,4.9,5.0,4.3,4.5
-sun397_conf_0180.jpg,5.0,4.7,3.8,4.0
-sun397_conf_0181.jpg,3.0,4.4,2.5,3.0
-sun397_conf_0182.jpg,4.9,4.5,5.0,4.5
-sun397_conf_0183.jpg,5.0,4.7,5.0,4.5
-sun397_conf_0184.jpg,5.0,4.3,5.0,4.5
-sun397_conf_0185.jpg,5.0,4.5,5.0,4.5
-sun397_conf_0186.jpg,5.0,3.9,5.0,4.0
-sun397_conf_0187.jpg,4.6,4.1,4.9,4.0
-sun397_conf_0188.jpg,4.5,4.1,4.6,4.0
-sun397_conf_0189.jpg,5.0,4.5,4.9,4.5
-sun397_conf_0190.jpg,5.0,5.0,4.7,4.5
-sun397_conf_0191.jpg,4.6,2.6,3.0,3.0
-sun397_conf_0192.jpg,4.9,4.2,5.0,4.5
-sun397_conf_0193.jpg,5.0,5.0,4.7,4.5
-sun397_conf_0194.jpg,4.3,4.5,3.2,3.5
-sun397_conf_0195.jpg,4.7,4.7,5.0,4.5
-sun397_conf_0196.jpg,5.0,3.7,5.0,4.5
-sun397_conf_0197.jpg,4.9,4.4,5.0,4.5
-sun397_conf_0198.jpg,5.0,3.8,5.0,4.5
-sun397_conf_0199.jpg,3.9,3.5,4.3,4.0
-sun397_conf_0200.jpg,5.0,4.6,4.7,4.5
-sun397_conf_0201.jpg,5.0,3.3,4.6,4.0
-sun397_conf_0202.jpg,5.0,4.4,5.0,4.5
-sun397_conf_0203.jpg,5.0,4.0,5.0,4.5
-sun397_conf_0204.jpg,4.3,3.3,5.0,3.5
-sun397_conf_0205.jpg,5.0,4.2,5.0,4.5
-sun397_conf_0206.jpg,4.7,4.6,5.0,4.0
-sun397_conf_0207.jpg,4.6,4.5,4.6,4.0
-sun397_conf_0208.jpg,4.7,4.4,4.9,4.5
-sun397_conf_0209.jpg,4.8,4.4,4.8,4.5
-sun397_conf_0210.jpg,5.0,3.9,4.9,4.5
-sun397_conf_0211.jpg,4.5,4.0,4.8,4.0
-sun397_conf_0212.jpg,5.0,4.4,5.0,4.0
-sun397_conf_0213.jpg,4.5,3.8,3.7,3.5
-sun397_conf_0214.jpg,3.7,5.0,3.5,3.5
-sun397_conf_0215.jpg,5.0,4.7,5.0,4.5
-sun397_conf_0216.jpg,5.0,4.9,4.2,4.5
-sun397_conf_0217.jpg,5.0,4.0,5.0,4.0
-sun397_conf_0218.jpg,4.9,4.5,5.0,4.5
-sun397_conf_0219.jpg,4.7,4.5,4.6,4.0
-sun397_conf_0220.jpg,4.4,3.8,4.3,4.0
-sun397_conf_0221.jpg,5.0,4.1,5.0,4.5
-sun397_conf_0222.jpg,5.0,5.0,4.6,4.0
-sun397_conf_0223.jpg,4.6,4.3,4.3,4.0
-sun397_conf_0224.jpg,5.0,5.0,4.3,4.5
-sun397_conf_0225.jpg,5.0,4.0,5.0,4.0
-sun397_conf_0226.jpg,5.0,5.0,4.7,5.0
-sun397_conf_0227.jpg,5.0,4.9,5.0,4.5
-sun397_conf_0228.jpg,4.7,4.4,5.0,4.0
-sun397_conf_0229.jpg,4.9,5.0,4.1,3.5
-sun397_conf_0230.jpg,4.3,4.4,4.8,4.0
-sun397_conf_0231.jpg,4.8,3.9,5.0,4.0
-sun397_conf_0232.jpg,5.0,4.0,4.4,4.0
-sun397_conf_0233.jpg,5.0,3.2,4.9,4.5
-sun397_conf_0234.jpg,4.7,3.6,4.7,4.0
-sun397_conf_0235.jpg,4.8,4.8,4.7,4.5
-sun397_conf_0236.jpg,4.2,4.3,4.9,4.0
-sun397_conf_0237.jpg,2.6,4.7,3.2,3.0
-sun397_conf_0238.jpg,4.6,4.0,5.0,4.0
-sun397_conf_0239.jpg,4.8,4.5,4.9,4.5
-sun397_conf_0240.jpg,4.7,4.0,5.0,4.5
-sun397_conf_0241.jpg,5.0,4.6,5.0,4.0
-sun397_conf_0242.jpg,4.4,3.9,5.0,3.5
-sun397_conf_0243.jpg,4.5,4.5,5.0,4.0
-sun397_conf_0244.jpg,5.0,4.1,5.0,4.5
-sun397_conf_0245.jpg,4.5,4.6,5.0,4.5
-sun397_conf_0246.jpg,4.6,4.2,5.0,4.5
-sun397_conf_0247.jpg,5.0,3.0,5.0,4.0
-sun397_conf_0248.jpg,5.0,5.0,4.8,4.5
-sun397_conf_0249.jpg,4.6,4.5,5.0,4.5
-sun397_conf_0250.jpg,4.9,4.7,4.9,4.5
-sun397_conf_0251.jpg,5.0,4.5,4.8,4.5
-sun397_conf_0252.jpg,5.0,4.6,5.0,4.5
-sun397_conf_0253.jpg,2.8,5.0,3.6,3.0
-sun397_conf_0254.jpg,4.8,4.5,5.0,4.5
-sun397_conf_0255.jpg,5.0,4.1,5.0,4.5
-sun397_conf_0256.jpg,5.0,4.2,5.0,4.0
-sun397_conf_0257.jpg,4.9,4.3,5.0,4.5
-sun397_conf_0258.jpg,4.6,4.0,2.9,3.0
-sun397_conf_0259.jpg,4.5,4.1,5.0,4.0
-sun397_conf_0260.jpg,4.7,4.2,4.2,3.5
-sun397_conf_0261.jpg,4.9,4.8,4.5,4.0
-sun397_conf_0262.jpg,5.0,4.7,5.0,4.5
-sun397_conf_0263.jpg,4.2,3.9,2.9,3.0
-sun397_conf_0264.jpg,5.0,4.8,4.8,4.0
-sun397_conf_0265.jpg,5.0,4.6,5.0,4.0
-sun397_conf_0266.jpg,5.0,4.7,4.5,5.0
-sun397_conf_0267.jpg,5.0,3.4,4.9,4.5
-sun397_conf_0268.jpg,5.0,4.7,4.8,4.5
-sun397_conf_0269.jpg,4.3,4.4,4.4,4.0
-sun397_conf_0270.jpg,4.7,4.0,5.0,4.0
-sun397_conf_0271.jpg,5.0,4.3,4.6,4.0
-sun397_conf_0272.jpg,4.9,4.8,4.8,4.5
-sun397_conf_0273.jpg,5.0,4.3,5.0,4.0
-sun397_conf_0274.jpg,5.0,4.2,4.3,4.0
-sun397_conf_0275.jpg,5.0,4.0,4.1,3.5
-sun397_conf_0276.jpg,4.7,5.0,5.0,4.0
-sun397_conf_0277.jpg,4.6,4.5,4.9,4.0
-sun397_conf_0278.jpg,5.0,4.5,5.0,4.5
-sun397_conf_0279.jpg,5.0,4.6,5.0,4.5
-sun397_conf_0280.jpg,5.0,3.7,5.0,4.0
-sun397_conf_0281.jpg,4.4,4.0,5.0,4.0
-sun397_conf_0282.jpg,5.0,4.2,4.6,4.0
-sun397_conf_0283.jpg,5.0,4.2,4.2,4.0
-sun397_conf_0284.jpg,4.6,5.0,4.4,4.0
-sun397_conf_0285.jpg,3.9,4.9,3.5,3.0
-sun397_conf_0286.jpg,5.0,4.2,5.0,4.0
-sun397_conf_0287.jpg,4.2,3.6,2.3,3.0
-sun397_conf_0288.jpg,4.9,4.7,4.1,4.5
-sun397_conf_0289.jpg,5.0,5.0,4.4,4.0
-sun397_conf_0290.jpg,4.9,3.7,4.7,4.5
-sun397_conf_0291.jpg,4.4,4.3,3.4,4.0
-sun397_conf_0292.jpg,5.0,5.0,4.9,4.5
-sun397_conf_0293.jpg,4.0,3.7,4.7,4.0
-sun397_conf_0294.jpg,3.5,3.7,4.1,3.5
-sun397_conf_0295.jpg,5.0,4.3,5.0,4.5
-sun397_conf_0296.jpg,5.0,4.0,4.8,4.0
-sun397_conf_0297.jpg,4.9,5.0,4.7,4.0
-sun397_conf_0298.jpg,4.4,4.6,5.0,4.5
-sun397_conf_0299.jpg,5.0,3.9,4.5,4.0
+filename,cleanliness_score,chair_alignment_score,clutter_score,overall_score,occupied,valid_room,confidence,notes
+sun397_conf_0000.jpg,5,4,5,4.5,0,1,high,clear table with ashtrays and name plate; chairs tucked; right side slightly uneven
+sun397_conf_0001.jpg,4,4,5,4.5,0,1,high,clear table; TV cables hanging; one chair slightly out
+sun397_conf_0002.jpg,4,3,2,2.5,0,1,high,paper stacks bag and laptop on table; papers on side counter; chairs uneven
+sun397_conf_0003.jpg,5,4,5,4.5,0,1,high,staged; fruit bowl and thermos intentional; chairs evenly placed but pulled out
+sun397_conf_0004.jpg,5,5,5,5,0,1,high,U-shape with place settings; perfectly arranged
+sun397_conf_0005.jpg,5,4,4,4,0,1,high,projector case and laptop left on table end; chairs mostly tucked
+sun397_conf_0006.jpg,5,4,5,4.5,0,1,high,U-shape; clear tables; chairs set but a few angled
+sun397_conf_0007.jpg,2,3,1,1.5,1,1,high,meeting in progress; laptops plates cups papers everywhere; cables on floor; whiteboard written
+sun397_conf_0008.jpg,5,4,5,4.5,0,1,high,clear table with candy bowl; chairs mostly aligned
+sun397_conf_0009.jpg,4,4,5,4,0,1,high,clear table; chairs slightly irregular; loose papers on shelves
+sun397_conf_0010.jpg,3,3,4,3.5,0,1,high,whiteboard full of writing; equipment carts and boxes at side; spare chairs against walls; conference phones are setup
+sun397_conf_0011.jpg,5,5,5,4.5,0,1,medium,ring table clear; chairs evenly aligned; dark photo
+sun397_conf_0012.jpg,3,4,5,4,0,1,medium,clear folding tables; trash bin in corner; worn stained floor; plain multipurpose room
+sun397_conf_0013.jpg,5,5,5,5,0,1,high,clear table with conference phone; chairs aligned
+sun397_conf_0014.jpg,3,2,2,2,0,1,high,papers binders tissue box and pens on table; chairs scattered; whiteboard covered; cluttered desks
+sun397_conf_0015.jpg,5,4,5,4.5,0,1,high,clear table; blank whiteboard; chairs slightly uneven
+sun397_conf_0016.jpg,5,4,5,4.5,0,1,high,clear table; one spare chair by window
+sun397_conf_0017.jpg,4,4,5,4,0,1,high,clear tables; a few chairs pulled out; small items on side furniture
+sun397_conf_0018.jpg,5,4,5,4.5,0,1,high,clear table; chairs evenly placed but pulled out
+sun397_conf_0019.jpg,4,4,4,4,0,1,high,mics at seats are setup; projector router and laptop with cables on table; equipment on side counter
+sun397_conf_0020.jpg,4,4,4,4,0,1,high,projector cable dangling onto table with small items; chairs mostly aligned; spare chairs at left
+sun397_conf_0021.jpg,5,4,5,4.5,0,1,high,U-shape with place settings; chairs slightly angled
+sun397_conf_0022.jpg,2,2,2,2,0,1,high,paper stack stapler and markers on table; whiteboard covered; bag on floor; chairs scattered
+sun397_conf_0023.jpg,5,4,5,4.5,0,1,high,U-shape clear tables; chairs neat
+sun397_conf_0024.jpg,5,4,5,4.5,0,1,high,place settings with bottles glasses and flowers; front chairs angled
+sun397_conf_0025.jpg,5,5,5,5,0,1,high,round table clear; chairs evenly tucked
+sun397_conf_0026.jpg,5,4,5,4.5,0,1,medium,small table clear; chairs mostly tucked; library room
+sun397_conf_0027.jpg,5,5,5,4.5,0,1,high,hollow square clear; spare chairs lined along wall
+sun397_conf_0028.jpg,4,4,5,4,0,1,high,clear table; spare chairs lined at wall; trash bin visible; chairs a bit irregular
+sun397_conf_0029.jpg,4,3,4,3.5,0,1,high,hollow square; several chairs rotated or pulled out; papers on far table
+sun397_conf_0030.jpg,4,4,5,4.5,0,1,high,clear table; chairs mostly aligned; posters pinned on whiteboard; phones and cables on TV stand
+sun397_conf_0031.jpg,4,5,4,4,0,1,medium,tablecloth with flowers and candles; overhead projector with tangled cables on table end; blurry
+sun397_conf_0032.jpg,4,4,5,4.5,0,1,high,clear table; spare chairs at walls; flip chart with drawing
+sun397_conf_0033.jpg,5,5,5,4.5,0,1,medium,table runner with pitcher and cups set out; chairs aligned; low-quality photo
+sun397_conf_0034.jpg,5,5,5,5,0,1,high,council chamber; desk pads and mics at seats; chairs aligned
+sun397_conf_0035.jpg,5,4,5,4.5,0,1,high,hollow square clear; a few chairs angled
+sun397_conf_0036.jpg,4,3,3,3,1,1,high,meeting in progress; papers and notepads across table
+sun397_conf_0037.jpg,4,4,5,4.5,0,1,high,clear tables; faint whiteboard writing; spare chairs lined along walls
+sun397_conf_0038.jpg,5,5,5,5,0,1,high,hollow square clear; chairs neatly placed
+sun397_conf_0039.jpg,5,5,5,5,0,1,high,hollow square with jugs glasses and notepads set out; chairs neat
+sun397_conf_0040.jpg,4,5,5,4.5,0,1,high,showroom; whiteboard with drawings and posters; laptop and projector on side stand; table clear
+sun397_conf_0041.jpg,5,5,5,4.5,0,1,high,coffee service laid out on table; chairs aligned
+sun397_conf_0042.jpg,5,4,4,4,1,1,high,meeting in progress; handouts and glasses at seats; briefcase on table
+sun397_conf_0043.jpg,5,5,5,4.5,0,1,medium,hollow square clear; chairs aligned; dark photo
+sun397_conf_0044.jpg,4,4,5,4.5,0,1,high,ashtray on table; spare chairs lined at wall; old TV and heater
+sun397_conf_0045.jpg,4,4,3,3.5,0,1,high,books papers and booklets spread at many seats; chairs mostly in place
+sun397_conf_0046.jpg,3,3,4,3.5,0,1,high,scissors on table; chairs uneven; cables on floor; workroom with desks
+sun397_conf_0047.jpg,5,5,5,5,0,1,medium,formal boardroom; table clear; chairs aligned
+sun397_conf_0048.jpg,4,4,5,4.5,0,1,medium,3D render not a photo; flip chart written; chairs slightly irregular
+sun397_conf_0049.jpg,5,4,5,4.5,0,1,high,place settings with glasses jug and notepads; front chairs pulled out
+sun397_conf_0050.jpg,5,4,5,4.5,0,1,medium,round table clear; partial view through doorway into office
+sun397_conf_0051.jpg,5,5,5,5,0,1,medium,3D render not a photo; table clear; chairs aligned
+sun397_conf_0052.jpg,5,4,5,4.5,0,1,high,clear modular tables; chairs slightly irregular
+sun397_conf_0053.jpg,4,4,5,4,0,0,high,event hall with theatre rows of folding chairs; not a conference table room
+sun397_conf_0054.jpg,4,4,4,4,0,1,high,whiteboard writing; magazines left on table; spare chairs by window
+sun397_conf_0055.jpg,4,4,5,4.5,0,1,high,clear tables; mic cable on table and floor
+sun397_conf_0056.jpg,2,2,1,1.5,1,1,high,workshop in progress; laptops cups papers and food across all tables
+sun397_conf_0057.jpg,5,5,4,4.5,0,1,high,tidy; one bag left on side cabinet
+sun397_conf_0058.jpg,5,4,5,4.5,0,1,medium,clear table with reflections; chairs slightly askew
+sun397_conf_0059.jpg,5,5,5,5,0,1,high,formal boardroom; table clear; chairs perfectly aligned
+sun397_conf_0060.jpg,4,3,3,3,1,1,high,meeting in progress; glasses papers newspapers camera and mic cable on tables
+sun397_conf_0061.jpg,5,5,5,5,0,1,high,place settings with bottles notepads and candy; chairs tucked
+sun397_conf_0062.jpg,4,4,5,4.5,0,1,high,phone on clear table; item left on a chair seat
+sun397_conf_0063.jpg,4,4,4,4,0,1,high,clear worn tables; leftover cups at near corner; flip chart written
+sun397_conf_0064.jpg,4,4,5,4.5,0,1,high,clear tables; TV and VCR with cables on side table; spare chairs
+sun397_conf_0065.jpg,4,3,5,4,0,1,high,clear tables; many chairs rotated; cables under table
+sun397_conf_0066.jpg,4,4,5,4.5,0,1,high,clear table; trash bin and spare chairs at wall
+sun397_conf_0067.jpg,5,5,3,3.5,0,1,high,AV cables and power brick strewn across table; chairs aligned
+sun397_conf_0068.jpg,5,5,5,5,0,1,high,decorative bowls and napkins set out; chairs neat
+sun397_conf_0069.jpg,4,5,5,4.5,0,0,high,banquet dining setup in a hall; photo studio light visible; not a conference room
+sun397_conf_0070.jpg,5,5,5,5,0,1,high,council chamber; delegate mics at seats; chairs aligned
+sun397_conf_0071.jpg,5,5,5,5,0,1,high,hotel U-shape; place settings and flowers; chairs aligned
+sun397_conf_0072.jpg,5,5,5,5,0,1,high,classroom-style tables with place settings; chairs aligned
+sun397_conf_0073.jpg,4,4,4,4,0,1,high,papers spread on table; cluttered bookshelf; chairs slightly irregular
+sun397_conf_0074.jpg,5,5,5,5,0,1,high,hotel boardroom; place settings and centrepiece; chairs aligned
+sun397_conf_0075.jpg,5,5,5,5,0,1,high,place settings with pads pens and water; chairs aligned
+sun397_conf_0076.jpg,5,4,5,4.5,0,0,medium,dining-hall style room with separate tables; chairs mostly tucked
+sun397_conf_0077.jpg,4,4,5,4.5,0,1,medium,U-shape with jugs glasses and papers set out; dated decor; flip pad
+sun397_conf_0078.jpg,5,4,5,4.5,0,1,high,clear table; laptop on AV stand; refreshments on sideboard; chairs slightly uneven
+sun397_conf_0079.jpg,5,4,5,4.5,0,1,high,coasters on table; PC on side counter; chairs mostly aligned
+sun397_conf_0080.jpg,4,5,5,4.5,0,0,high,banquet table set with flowers and cutlery; buffet chafing dishes; event hall not conference room
+sun397_conf_0081.jpg,5,4,4,4,1,1,high,small meeting in progress; laptop mug and papers at one end; rest of round table clear
+sun397_conf_0082.jpg,3,3,2,2.5,1,0,high,gala dinner in progress; plates glasses and food on table; not a conference room
+sun397_conf_0083.jpg,4,4,3,3.5,1,1,high,large summit in progress; papers bottles and mics at every seat
+sun397_conf_0084.jpg,5,5,5,5,0,1,high,U-shape with tablecloths cups and flowers set out; chairs aligned
+sun397_conf_0085.jpg,5,5,5,5,0,1,high,modular tables clear; chairs neatly placed
+sun397_conf_0086.jpg,4,4,5,4.5,0,1,medium,hotel suite with lounge area; table clear; chairs slightly irregular
+sun397_conf_0087.jpg,5,5,5,5,0,1,high,placemats at every seat; chairs tucked
+sun397_conf_0088.jpg,5,4,4,4.5,0,1,high,keyboard touch panel and mouse on table end; conference mics; chairs mostly aligned
+sun397_conf_0089.jpg,4,3,2,2.5,1,1,high,meeting in progress; papers folders mugs projector and mouse across table
+sun397_conf_0090.jpg,5,4,5,4.5,0,1,medium,table clear; chairs mostly tucked; dated photo with watermark
+sun397_conf_0091.jpg,5,5,5,4.5,0,1,high,U-shape with one sheet of paper; banner stands; chairs neat
+sun397_conf_0092.jpg,5,4,5,4.5,0,1,high,hollow square clear; spare chairs along window; a few chairs off
+sun397_conf_0093.jpg,4,4,5,4.5,0,1,high,clear folding tables; kitchen area visible; plain community room
+sun397_conf_0094.jpg,3,3,4,3.5,0,1,high,whiteboard covered in writing; marker left on table; chairs unevenly placed
+sun397_conf_0095.jpg,4,3,5,4,0,1,high,clear table; chairs scattered unevenly; projection on whiteboard
+sun397_conf_0096.jpg,5,5,5,5,0,1,high,water jugs set out; refreshment station on side; chairs aligned
+sun397_conf_0097.jpg,4,3,3,3,1,1,high,meeting in progress; books keys and papers spread on table
+sun397_conf_0098.jpg,4,4,5,4.5,0,1,medium,tissue box on table; something on floor under table; dark photo
+sun397_conf_0099.jpg,5,5,5,5,0,1,high,decorative centrepiece; chairs aligned
+sun397_conf_0100.jpg,5,4,5,4.5,0,1,high,table clear; chairs evenly placed but slightly out
+sun397_conf_0101.jpg,4,3,1,2,0,1,medium,bag laptop cables folders glass and papers left on table; coat over chair; dark photo
+sun397_conf_0102.jpg,4,4,5,4.5,0,1,high,hollow square with cloths; clear; spare chairs scattered at walls
+sun397_conf_0103.jpg,5,5,5,5,1,1,high,luxury place settings with fruit and glasses; one person standing
+sun397_conf_0104.jpg,3,3,1,2,1,0,high,workshop in progress; laptops cups bags papers and cables everywhere
+sun397_conf_0105.jpg,5,4,5,4,0,0,high,lecture-style rows of chairs with a single desk; not a conference table room
+sun397_conf_0106.jpg,5,5,5,5,0,1,high,brochures set at seats; keyboard on table; chairs aligned
+sun397_conf_0107.jpg,5,4,5,4.5,0,1,medium,water jug and glasses on tray; chairs slightly irregular
+sun397_conf_0108.jpg,4,4,5,4.5,0,1,medium,clear table; dated room; chairs mostly tucked
+sun397_conf_0109.jpg,4,5,5,4.5,0,1,medium,hollow square clear; stacked chairs and trash bins at side; dark
+sun397_conf_0110.jpg,5,4,5,4.5,0,1,high,small glass-walled room; table clear; chairs slightly out
+sun397_conf_0111.jpg,5,5,5,4.5,0,1,low,ornate heritage room; table clear; very dark backlit photo
+sun397_conf_0112.jpg,5,4,5,4.5,0,1,high,3D render not a photo; table clear; chairs evenly placed
+sun397_conf_0113.jpg,4,3,5,4,0,1,high,clear table; chairs unevenly pulled out; empty shelves; dim
+sun397_conf_0114.jpg,4,4,5,4.5,0,1,medium,small box on table; spare chairs by walls; dated photo
+sun397_conf_0115.jpg,5,4,5,4.5,0,1,medium,phone on table; chairs mostly aligned; warm cast
+sun397_conf_0116.jpg,4,4,5,4,0,1,high,clear table; spare chairs crowded along walls and window
+sun397_conf_0117.jpg,3,2,4,3,0,1,high,tables and chairs jumbled at angles; laptop left; item on floor
+sun397_conf_0118.jpg,4,3,5,4,0,1,medium,seen through glass; table clear; chairs pulled out unevenly; flip chart
+sun397_conf_0119.jpg,5,4,5,4.5,0,1,medium,seen through glass wall; table clear; chairs slightly angled; cleaning sign outside
+sun397_conf_0120.jpg,4,3,3,3,1,1,high,meeting in progress; cups bottles papers and bags on tables and floor
+sun397_conf_0121.jpg,4,4,5,4.5,0,1,high,hollow square clear; papers posted on wall; extra chairs at side
+sun397_conf_0122.jpg,5,4,5,4.5,0,1,high,hexagon tables clear; spare chairs along wall
+sun397_conf_0123.jpg,5,4,2,3,0,1,high,tangle of cables power brick laptop and touch panel on table; chairs pushed out
+sun397_conf_0124.jpg,5,5,5,5,0,1,high,training setup with folders name cards and mints; laptop projector at front; jacket on one chair
+sun397_conf_0125.jpg,4,3,2,2.5,1,1,high,meeting in progress; cups bottles plates papers and pencil case on tables; projector cables on floor
+sun397_conf_0126.jpg,4,4,5,4.5,0,1,high,plain room; table clear; cables on AV cart; chairs fairly aligned
+sun397_conf_0127.jpg,5,5,5,4.5,0,1,high,3D render not a photo; laptop on table end; chairs aligned
+sun397_conf_0128.jpg,5,5,5,5,0,1,high,bottles and glasses set at stations; welcome message on flip chart
+sun397_conf_0129.jpg,5,5,5,5,0,1,high,table clear; chairs tucked and aligned
+sun397_conf_0130.jpg,4,3,3,3,1,1,high,meeting in progress; bottles glasses papers and flags on tables
+sun397_conf_0131.jpg,4,4,5,4.5,0,1,medium,seen through glass; notepads and phone set out; loose cables on floor
+sun397_conf_0132.jpg,5,5,5,5,0,1,high,placemats at every seat; conference phone; chairs aligned
+sun397_conf_0133.jpg,5,5,5,4.5,0,0,high,formal banquet dinner setup; not a conference room
+sun397_conf_0134.jpg,5,5,5,5,0,1,medium,place settings with bottles notepads and glasses; dark photo
+sun397_conf_0135.jpg,5,5,5,5,0,1,high,table clear; chairs aligned
+sun397_conf_0136.jpg,4,5,4,4.5,0,1,high,council chamber; monitors keyboards and mics are built-in seat setup; cables under tables
+sun397_conf_0137.jpg,5,4,5,4.5,0,1,high,U-shape clear; chairs slightly irregular
+sun397_conf_0138.jpg,5,5,5,5,0,1,high,luxury place settings with jugs and fruit; chairs aligned
+sun397_conf_0139.jpg,4,3,5,4,0,1,high,multipurpose room; tables clear; spare chairs along walls; trash bin; chairs irregular
+sun397_conf_0140.jpg,4,3,2,2.5,1,1,low,break in a meeting; cups papers jugs and folders across table; blurry
+sun397_conf_0141.jpg,4,4,5,4.5,0,1,high,long table clear; spare chairs at end; dated room
+sun397_conf_0142.jpg,4,4,5,4.5,0,1,high,conference phone and remote on table; whiteboard partly written
+sun397_conf_0143.jpg,5,4,5,4.5,0,1,high,large hollow square clear; chairs fairly aligned
+sun397_conf_0144.jpg,5,5,5,4.5,0,1,high,long table clear; chairs aligned; heritage room
+sun397_conf_0145.jpg,5,5,5,5,0,1,high,newsletters papers and glasses set at every seat; projector cart in middle
+sun397_conf_0146.jpg,4,4,5,4.5,0,1,high,plain folding tables clear; spare chairs lined along wall
+sun397_conf_0147.jpg,5,5,5,5,0,1,high,bottles glasses and notepads set out; chairs aligned
+sun397_conf_0148.jpg,5,4,5,4.5,0,1,high,hotel room with water and notepads set; chairs slightly angled
+sun397_conf_0149.jpg,5,5,5,5,0,1,high,hotel boardroom; water and notepads set out; chairs aligned
+sun397_conf_0150.jpg,4,2,3,2.5,1,1,high,crowded gathering; cups papers banner and cap on table; chairs everywhere
+sun397_conf_0151.jpg,5,5,5,5,0,1,high,large U-shape; bottles glasses and pens set out; chairs aligned
+sun397_conf_0152.jpg,5,4,5,4.5,0,1,high,industrial room; jug glasses and flowers set; chairs slightly irregular
+sun397_conf_0153.jpg,3,4,3,3.5,0,1,high,projector with cables on table; power strip and wires on floor
+sun397_conf_0154.jpg,4,4,2,3,0,1,high,boxes binders and books stacked at table end; cables on table
+sun397_conf_0155.jpg,5,5,5,4.5,0,0,high,summit banquet with food and place settings; not a standard conference room
+sun397_conf_0156.jpg,5,4,5,4.5,0,1,medium,table clear; chairs mostly tucked; partial view
+sun397_conf_0157.jpg,5,4,5,4.5,0,1,medium,plant centrepiece; chairs aligned; old scanned photo
+sun397_conf_0158.jpg,4,4,4,4,0,1,high,bag and papers left on table; copier and clutter at side
+sun397_conf_0159.jpg,5,5,5,5,0,1,high,table clear; chairs aligned; clean whiteboard
+sun397_conf_0160.jpg,5,4,2,2.5,1,1,high,one person working; laptop phone binders brochures and papers spread over table
+sun397_conf_0161.jpg,5,4,5,4.5,0,1,medium,low angle; phone on table; chairs evenly placed
+sun397_conf_0162.jpg,5,4,5,4.5,0,1,high,folding tables and chairs in U-shape; tidy; kitchenette at side
+sun397_conf_0163.jpg,4,4,4,4,0,1,high,seminar setup with bottles and folders; coats and bags left on chairs; items on stage floor
+sun397_conf_0164.jpg,5,4,4,4.5,0,1,medium,glasses and coasters set; red binder left on table
+sun397_conf_0165.jpg,5,5,5,5,0,1,high,luxury setup with pads pens and glasses; chairs aligned
+sun397_conf_0166.jpg,3,4,5,3.5,0,1,high,clear table; shelves and counter cluttered with books and papers; chalkboard dusty
+sun397_conf_0167.jpg,4,4,5,4.5,0,1,high,clear table; box on cabinet; few chairs
+sun397_conf_0168.jpg,3,4,5,3.5,0,1,medium,tablecloth; rustic room with art pinned up and clutter at sides
+sun397_conf_0169.jpg,5,5,5,5,0,1,high,U-shape clear; chairs aligned; clean whiteboard
+sun397_conf_0170.jpg,5,4,5,4.5,0,1,high,tablecloth with placemats and flowers; spare chairs by window
+sun397_conf_0171.jpg,2,3,4,3,0,1,high,computer desk with cables spaghetti and papers; items on floor; posters taped; tables clear
+sun397_conf_0172.jpg,5,5,5,5,0,1,high,long table clear; chairs aligned
+sun397_conf_0173.jpg,5,5,5,5,0,1,medium,large table with two small boxes; chairs aligned; scanned print
+sun397_conf_0174.jpg,5,4,5,4.5,0,1,high,dark glass table clear; chairs slightly askew; viewed from doorway
+sun397_conf_0175.jpg,4,4,1,2,0,1,high,laptops cables mice phone and fruit plates strewn across table
+sun397_conf_0176.jpg,5,5,5,4.5,0,1,high,long table clear; chairs aligned; old room
+sun397_conf_0177.jpg,5,4,5,4.5,0,1,high,jugs glasses pads and pens set out; chairs mostly aligned
+sun397_conf_0178.jpg,4,3,3,3,1,1,high,meeting in progress; papers mics and binders across tables; jacket on chair; cable on floor
+sun397_conf_0179.jpg,4,4,4,4,1,1,high,meeting in progress; cups and papers on tables; handbag on floor
+sun397_conf_0180.jpg,5,5,5,5,0,1,high,heritage room; bottles glasses and pads set out; chairs aligned
+sun397_conf_0181.jpg,4,3,1,1.5,1,1,high,lunch meeting in progress; food containers cups thermos and notebooks covering table
+sun397_conf_0182.jpg,5,4,5,4.5,0,1,high,oval table clear; spare chairs at wall; chairs slightly irregular
+sun397_conf_0183.jpg,5,4,5,4.5,0,1,high,large modern table clear; chairs evenly placed
+sun397_conf_0184.jpg,5,4,5,4.5,0,1,medium,oval table clear; coat on one chair; phone photo
+sun397_conf_0185.jpg,5,5,5,4.5,0,1,medium,white tables clear; chairs aligned; dim
+sun397_conf_0186.jpg,5,5,5,5,0,1,high,placemats paper and flowers set; chairs aligned
+sun397_conf_0187.jpg,5,4,5,4.5,0,1,high,U-shape clear; one item on table; chairs mostly aligned
+sun397_conf_0188.jpg,5,4,5,4.5,0,1,high,plain tables clear; spare chair at side; date-stamped photo
+sun397_conf_0189.jpg,5,4,5,4.5,0,1,high,wood-panelled room; table clear apart from small ornament; spare chairs at wall
+sun397_conf_0190.jpg,5,4,5,4.5,0,1,high,table clear; whiteboard clean; chairs slightly irregular
+sun397_conf_0191.jpg,4,4,3,3.5,1,1,high,workshop in progress; bottles cups laptops papers and charger on tables
+sun397_conf_0192.jpg,4,4,5,4.5,0,1,high,tables clear; old TV with dangling cable; trash bin visible
+sun397_conf_0193.jpg,5,5,5,5,0,1,high,bottles and pads set at every seat; chairs aligned
+sun397_conf_0194.jpg,5,5,5,5,0,1,high,bottles glasses and pads set; flip charts; chairs aligned
+sun397_conf_0195.jpg,5,4,5,4.5,0,1,high,name cards bottles and glasses set; chairs mostly aligned
+sun397_conf_0196.jpg,5,4,5,4.5,0,1,high,conference phones and trophy on table; chairs aligned; sunlit
+sun397_conf_0197.jpg,3,4,5,3.5,0,1,high,table clear; bags of trash or laundry piled on chairs in corner; spare chairs crowded
+sun397_conf_0198.jpg,5,4,5,4.5,0,1,high,new furniture with price tags; table clear; chairs slightly angled
+sun397_conf_0199.jpg,5,5,5,5,0,1,high,hotel ballroom setup with bottles glasses and flowers; chairs aligned
+sun397_conf_0200.jpg,2,4,4,3,0,1,medium,menu folder on table; workshop or warehouse setting with paint tins boxes and mug on floor
+sun397_conf_0201.jpg,5,5,5,5,0,1,high,tables clear; projector on; whiteboard clean; chairs aligned
+sun397_conf_0202.jpg,4,4,5,4.5,0,1,medium,phone on table; water tray on sideboard; router and cables at wall; trash bin
+sun397_conf_0203.jpg,5,5,5,5,0,1,high,luxury boardroom; table clear; chairs aligned
+sun397_conf_0204.jpg,5,4,5,4.5,0,1,medium,two papers on table; chairs mostly aligned; watermark
+sun397_conf_0205.jpg,4,4,5,4,0,1,high,showroom display rack with samples; table clear; coat stand
+sun397_conf_0206.jpg,5,5,5,4.5,0,1,high,hollow square of folding tables clear; chairs aligned; AV cart at side
+sun397_conf_0207.jpg,5,4,5,4.5,0,1,high,table clear; chairs evenly placed
+sun397_conf_0208.jpg,5,5,5,5,0,1,high,U-shape with mics and glasses set; theatre rows behind; chairs aligned
+sun397_conf_0209.jpg,3,4,5,3.5,0,1,high,raw concrete room; water bottles stacked on floor; jar on table; bag on floor
+sun397_conf_0210.jpg,5,5,5,5,0,1,high,luxury setup with candles stones flowers and pads; refreshments on sideboard; chairs aligned
+sun397_conf_0211.jpg,3,3,5,3.5,0,1,low,hexagon tables clear; sofas and stacked mats crowding corner; chairs irregular; blurry
+sun397_conf_0212.jpg,5,4,5,4.5,0,1,high,folding tables clear; spare chairs stacked at side; chairs mostly aligned
+sun397_conf_0213.jpg,5,5,5,5,0,1,high,cups glasses bottles and apples set at every seat; chairs aligned
+sun397_conf_0214.jpg,5,5,4,4.5,0,1,medium,place settings with bottles and fruit; open laptop on table
+sun397_conf_0215.jpg,5,4,5,4.5,0,1,high,long table clear; chairs evenly placed; plain room
+sun397_conf_0216.jpg,5,5,5,5,0,1,high,bottles glasses and pads set out; chairs aligned
+sun397_conf_0217.jpg,4,4,5,4,0,1,high,U-shape tables clear; spare chairs at wall; remote on side table; chairs irregular
+sun397_conf_0218.jpg,5,5,5,4.5,0,1,medium,table clear; screen on; chairs aligned; dark
+sun397_conf_0219.jpg,5,4,5,4.5,0,1,high,flower centrepiece; TV on; chairs slightly angled
+sun397_conf_0220.jpg,4,4,3,3,1,1,high,meeting in progress; papers keyboard mouse and touch panel on table; cables
+sun397_conf_0221.jpg,5,4,5,4.5,0,1,high,hollow square clear; chairs stacked upside down on table at back
+sun397_conf_0222.jpg,5,4,5,4.5,0,1,high,table clear; chairs evenly placed; cabinets closed
+sun397_conf_0223.jpg,5,4,5,4.5,0,1,medium,table clear; spare chairs lined at wall; chairs slightly irregular
+sun397_conf_0224.jpg,5,5,5,5,0,1,high,luxury boardroom; table clear; chairs aligned
+sun397_conf_0225.jpg,5,5,5,5,0,1,high,square table clear; chairs aligned
+sun397_conf_0226.jpg,5,5,5,5,0,1,high,delegate mics at every seat; chairs aligned
+sun397_conf_0227.jpg,5,5,5,5,0,1,high,long table clear; chairs aligned; modern room
+sun397_conf_0228.jpg,5,4,5,4.5,0,1,high,hotel U-shape with pads glasses and thermoses; coffee station; chairs slightly angled
+sun397_conf_0229.jpg,5,5,5,5,0,1,high,3D render not a photo; glasses and papers set at every seat; chairs aligned
+sun397_conf_0230.jpg,5,5,5,5,0,1,high,glass table with jug glasses and pads set out; chairs aligned
+sun397_conf_0231.jpg,4,4,5,4,0,1,high,hexagon table clear; boxes and clutter on shelf; TV cart with cables; chalkboard
+sun397_conf_0232.jpg,3,4,5,3.5,0,1,high,U-shape clear; storage shelves full of boxes and binders; flip chart written; clutter at side
+sun397_conf_0233.jpg,4,4,5,4,0,1,medium,new chairs still in plastic wrap; box on floor; viewed through glass
+sun397_conf_0234.jpg,5,4,5,4.5,0,1,medium,U-shape clear; coat rack; small table in middle
+sun397_conf_0235.jpg,5,4,5,4.5,0,1,medium,heritage room; table clear; chairs aligned; partial person at edge
+sun397_conf_0236.jpg,5,4,5,4.5,0,1,high,oval table clear; spare chairs at back table
+sun397_conf_0237.jpg,3,3,1,2,1,1,high,meeting in progress; laptops projector cables cans bottles snacks and papers everywhere
+sun397_conf_0238.jpg,5,4,5,4.5,0,1,high,oval table clear; chairs slightly irregular; minimal
+sun397_conf_0239.jpg,4,4,4,4,0,1,high,phone mouse pad and cables on glass table; TV mount empty with dangling cables
+sun397_conf_0240.jpg,4,4,4,4,0,0,high,holiday party setup with figurines poinsettias and candy canes on all tables; event not meeting
+sun397_conf_0241.jpg,5,5,5,5,0,1,medium,granite table clear; chairs aligned; warm cast
+sun397_conf_0242.jpg,5,4,5,4.5,0,1,high,hollow square clear; spare tables at wall; kitchenette
+sun397_conf_0243.jpg,4,4,3,3.5,0,1,medium,projector with cable on table; computer desk with keyboard and cables at side; dim
+sun397_conf_0244.jpg,5,4,5,4.5,0,1,medium,low angle; table clear; chairs mostly aligned
+sun397_conf_0245.jpg,4,4,5,4.5,0,1,high,long table clear; spare chairs lined along curtains; TV cart with equipment
+sun397_conf_0246.jpg,5,5,5,5,0,1,high,oval table clear; chairs aligned; close-up
+sun397_conf_0247.jpg,4,3,4,3.5,1,0,medium,seminar in progress with theatre seating; not a conference table room
+sun397_conf_0248.jpg,4,4,5,4.5,0,1,high,tables clear; whiteboard partly written; spare desks at side; monitor on far table
+sun397_conf_0249.jpg,4,4,4,4,0,1,high,phone with loose cable on table; flip chart; markers on whiteboard tray
+sun397_conf_0250.jpg,5,4,5,4.5,0,1,high,long table clear; chairs evenly placed; modern room
+sun397_conf_0251.jpg,5,4,5,4.5,0,1,medium,small room; table clear; chairs slightly askew
+sun397_conf_0252.jpg,5,5,5,5,0,1,high,heritage boardroom; table clear; chairs perfectly aligned
+sun397_conf_0253.jpg,5,4,3,3.5,0,1,high,two laptops phone calculator papers and loose cables on table
+sun397_conf_0254.jpg,5,5,5,5,0,1,high,round summit table with name cards mics bottles and headsets set; chairs aligned
+sun397_conf_0255.jpg,4,4,4,4,0,1,high,name plates mugs and handouts set; cake and paper plates on side table; easels with maps
+sun397_conf_0256.jpg,5,4,5,4.5,0,1,high,hollow square clear; spare chairs at back; flip chart
+sun397_conf_0257.jpg,5,5,5,5,0,1,high,designer room; sculpture centrepiece; chairs aligned
+sun397_conf_0258.jpg,5,5,5,5,0,1,high,hotel boardroom; bottles glasses and pads set; chairs aligned
+sun397_conf_0259.jpg,5,4,5,4.5,0,1,high,oval of folding tables clear; spare chairs stacked at side
+sun397_conf_0260.jpg,4,4,4,4,0,1,medium,laptop with cables on table; bag on a chair; water bottles in cabinet; dim
+sun397_conf_0261.jpg,3,3,2,2.5,0,1,high,keyboard mouse paper towel roll tape and papers left on table; boxes stacked in corner; whiteboard written
+sun397_conf_0262.jpg,5,4,5,4.5,0,1,medium,small table clear; chairs slightly askew; scanned print
+sun397_conf_0263.jpg,5,4,5,4.5,0,1,high,drink bottles jugs and glasses set out; round tables behind; chairs fairly aligned
+sun397_conf_0264.jpg,5,4,5,4.5,0,1,high,table clear; armchair with cushion in corner; chairs slightly irregular
+sun397_conf_0265.jpg,5,4,5,4.5,0,1,high,folding tables clear; kitchenette; chairs mostly aligned
+sun397_conf_0266.jpg,4,4,5,4.5,0,1,medium,heritage room; table clear; spare chairs lined along walls; dim
+sun397_conf_0267.jpg,5,5,5,5,0,1,medium,state room with mics and plants; chairs aligned; date stamp
+sun397_conf_0268.jpg,5,5,5,5,0,1,high,table clear; chairs aligned; clean whiteboard
+sun397_conf_0269.jpg,4,4,3,3.5,0,1,high,blotters set at seats but laptop monitor keyboard mouse cables and booklets at near end
+sun397_conf_0270.jpg,5,5,5,5,0,1,high,hotel banquet-style U with cloths glasses pads and flowers set; chairs aligned
+sun397_conf_0271.jpg,4,4,5,4,0,1,low,conference phone on table; loose cable under table; dark date-stamped print
+sun397_conf_0272.jpg,5,4,5,4.5,0,1,high,bottles glasses and candy set; fruit on side table; chairs slightly angled
+sun397_conf_0273.jpg,5,4,5,4,0,1,low,lounge-style mixed chairs; table clear; vending area visible; blurry
+sun397_conf_0274.jpg,5,4,5,4.5,0,1,medium,U-shape clear; chairs fairly aligned; backlit
+sun397_conf_0275.jpg,5,4,5,4.5,0,1,high,video conference unit; phone puck on table; trash bin; chairs slightly askew
+sun397_conf_0276.jpg,5,5,5,5,0,1,high,state room oval with mics and plants; chairs aligned
+sun397_conf_0277.jpg,5,4,5,4.5,0,1,high,heritage mahogany table clear; chairs evenly placed
+sun397_conf_0278.jpg,4,3,3,3,0,1,medium,leftover cups saucers can jar and projector with cables on far table; chairs irregular
+sun397_conf_0279.jpg,4,3,4,3.5,0,1,high,tissue box and dishes on table; chairs uneven; posters and map pinned to wall
+sun397_conf_0280.jpg,5,5,5,5,0,1,high,pads and pens set at every seat; chairs aligned
+sun397_conf_0281.jpg,3,4,4,3.5,0,1,high,tissue box on table; boxes stacked and printer clutter at side; fan; whiteboard grid
+sun397_conf_0282.jpg,4,3,3,3,0,1,high,crayons jar papers pens and sign left on glass table; chairs irregular
+sun397_conf_0283.jpg,5,5,5,5,0,1,high,hotel boardroom; bottles glasses pads and name cards set; chairs aligned
+sun397_conf_0284.jpg,5,4,5,4.5,0,1,high,phone with cord on table; chairs mostly tucked
+sun397_conf_0285.jpg,5,4,3,3,1,1,high,meeting in progress; mugs papers laptop and pastries on table
+sun397_conf_0286.jpg,5,4,5,4.5,0,1,medium,seen through glass doors; table clear; one chair pulled away
+sun397_conf_0287.jpg,5,5,5,5,0,1,high,banquet-style U with bottles glasses and flowers set; chairs aligned
+sun397_conf_0288.jpg,4,4,5,4.5,0,1,high,table clear; projector cables exposed on ceiling; chairs fairly aligned
+sun397_conf_0289.jpg,5,4,4,4,1,1,high,presenter standing; bag left on table; chairs mostly aligned
+sun397_conf_0290.jpg,4,3,4,3.5,0,1,high,conference phone with trailing cord pen and paper on table; chairs pushed to wall and pulled out; cables on floor
+sun397_conf_0291.jpg,5,5,5,5,0,1,high,boardroom with delegate mics and monitors; glasses tray; chairs aligned
+sun397_conf_0292.jpg,5,5,5,4.5,0,0,high,stately dining hall roped off as exhibit; not a conference room
+sun397_conf_0293.jpg,5,4,4,4,0,1,high,training room; projector and laptop with cables on front table; chairs mostly aligned
+sun397_conf_0294.jpg,3,3,2,2.5,1,1,high,laptop cup and tissue on table; coats on chairs; whiteboard covered in writing
+sun397_conf_0295.jpg,5,5,5,5,0,1,high,hotel U-shape; bottles glasses pads and pens set; chairs aligned
+sun397_conf_0296.jpg,5,4,5,4.5,0,1,medium,large table clear; chairs mostly aligned; warm low light
+sun397_conf_0297.jpg,5,4,5,4.5,0,1,high,small items on table; trash bins at walls; chairs mostly aligned
+sun397_conf_0298.jpg,4,3,5,4,0,1,high,table clear; chairs unevenly placed; drawing on whiteboard; spare chairs at walls
+sun397_conf_0299.jpg,4,5,5,4.5,0,1,medium,rustic lodge room; table clear; chairs aligned; candles on mantel

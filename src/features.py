@@ -15,8 +15,7 @@ from utils import ROOT, load_config
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s", datefmt="%H:%M:%S")
 log = logging.getLogger(__name__)
 
-DEFAULT_CLUTTER   = ["handbag", "backpack", "bottle", "cup", "laptop", "cell phone", "remote", "book"]
-DEFAULT_FURNITURE = ["chair", "dining table"]
+GRID = 200   # resolution of the normalized-coordinate grid used for box-union areas
 
 
 def nn_distances(centroids):
@@ -27,18 +26,16 @@ def nn_distances(centroids):
     return [float(np.min(np.linalg.norm(np.delete(arr, i, axis=0) - c, axis=1)))
             for i, c in enumerate(arr)]
 
-def overlap_fraction(table, obj):
-    """Fraction of obj's bounding box that overlaps with the table's bounding box."""
-    # Convert (center, size) → (left, right, top, bottom)
-    def corners(d):
-        return d["x_center"]-d["width"]/2, d["x_center"]+d["width"]/2, \
-               d["y_center"]-d["height"]/2, d["y_center"]+d["height"]/2
-    tx1,tx2,ty1,ty2 = corners(table)
-    ox1,ox2,oy1,oy2 = corners(obj)
-    iw = max(0.0, min(tx2,ox2) - max(tx1,ox1))
-    ih = max(0.0, min(ty2,oy2) - max(ty1,oy1))
-    area = obj["width"] * obj["height"]
-    return (iw * ih) / area if area > 0 else 0.0
+def union_mask(boxes, n=GRID):
+    """Boolean n×n mask covering the union of normalized boxes (so overlaps count once)."""
+    mask = np.zeros((n, n), dtype=bool)
+    for d in boxes:
+        x1 = round(np.clip(d["x_center"] - d["width"]/2,  0, 1) * n)
+        x2 = round(np.clip(d["x_center"] + d["width"]/2,  0, 1) * n)
+        y1 = round(np.clip(d["y_center"] - d["height"]/2, 0, 1) * n)
+        y2 = round(np.clip(d["y_center"] + d["height"]/2, 0, 1) * n)
+        mask[y1:y2, x1:x2] = True
+    return mask
 
 
 def compute_features(dets, clutter_cls, furniture_cls, floor_frac=0.45):
@@ -72,7 +69,7 @@ def compute_features(dets, clutter_cls, furniture_cls, floor_frac=0.45):
 
     # Clutter features (how messy) 
     feat["clutter_object_count"] = float(len(clutter))
-    feat["clutter_density"]      = float(sum(d["width"]*d["height"] for d in clutter))  
+    feat["clutter_area_frac"]    = float(sum(d["width"]*d["height"] for d in clutter))  # summed box area / image area
 
     # Objects on the floor = non-furniture objects in the bottom portion of image
     floor_start = 1.0 - floor_frac
@@ -85,13 +82,12 @@ def compute_features(dets, clutter_cls, furniture_cls, floor_frac=0.45):
     # Scene features (room-level context)
     feat["person_present"] = 1.0 if people else 0.0
 
-    # How much of each table is covered by objects on top of it
-    if tables:
-        table_area = sum(t["width"]*t["height"] for t in tables)
-        non_furn   = [d for d in dets if d["class"] not in furniture_cls]
-        covered    = sum(overlap_fraction(t, o) * o["width"]*o["height"]
-                        for t in tables for o in non_furn)
-        feat["table_surface_occupancy"] = float(min(covered/table_area, 1.0)) if table_area > 0 else 0.0
+    # Fraction of the table area covered by items (people sitting at the table are not items)
+    table_mask = union_mask(tables)
+    items      = [d for d in dets if d["class"] not in furniture_cls | {"person"}]
+    if table_mask.any():
+        covered = (table_mask & union_mask(items)).sum()
+        feat["table_surface_occupancy"] = float(covered / table_mask.sum())
     else:
         feat["table_surface_occupancy"] = 0.0
 
@@ -109,8 +105,8 @@ def build_features_csv(detections_path, output_path, config):
 
     all_dets  = json.load(open(detections_path, encoding="utf-8"))
     cfg       = config.get("features", {})
-    clutter   = set(cfg.get("clutter_classes",   DEFAULT_CLUTTER))
-    furniture = set(cfg.get("furniture_classes",  DEFAULT_FURNITURE))
+    clutter   = set(cfg["clutter_classes"])
+    furniture = set(cfg["furniture_classes"])
     floor_frac = float(cfg.get("floor_region_fraction", 0.45))
 
     log.info("Computing features for %d images…", len(all_dets))
