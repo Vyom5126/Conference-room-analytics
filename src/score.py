@@ -3,20 +3,25 @@ score.py
 For every target in config.model.targets, cross-validate a predict-the-mean
 baseline and models built on three feature sets, using repeated K-fold:
 
-  detection  13 YOLO features          → Linear, Ridge, Random Forest, XGBoost
-  clip       CLIP image embeddings     → Ridge ("linear probe")
-  hybrid     embeddings + YOLO features → Ridge
+  detection    13 YOLO features                      → Linear, Ridge, Random Forest, XGBoost
+  embed        image embeddings (embed.py)           → Ridge ("linear probe")
+  embed_table  image embeddings + table close-up     → Ridge
+  hybrid       image embeddings + YOLO features      → Ridge
 
 Each model is then refit on all labelled data and saved to
-models/<target>/<model>.joblib. Writes outputs/cv_results.csv, out-of-fold
-predictions for the primary target, and comparison charts.
+models/<target>/<model>.joblib together with a score range calibrated on its
+out-of-fold errors (split-conformal, see intervals.py). Also writes:
+  models/selection.json       model per target for the app's "auto" mode (simplest within 0.005 of best CV MAE)
+  models/reference.npz        training embeddings + threshold for the "not a conference room?" check
+  outputs/cv_results.csv      CV metrics and range coverage for every target × model
+  outputs/oof_predictions.csv out-of-fold predictions for the primary target (+ charts)
 
 Images rated valid_room = 0 in labels.csv (not conference rooms) are left out.
 
 Usage:
     python src/score.py
 """
-import argparse, logging, warnings
+import argparse, json, logging, warnings
 from pathlib import Path
 import joblib, numpy as np, pandas as pd
 import matplotlib; matplotlib.use("Agg")
@@ -32,6 +37,8 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from xgboost import XGBRegressor
 from embed import load_embeddings
+from intervals import apply_interval, fit_interval, heldout_coverage
+from ood import fit_reference
 from utils import ROOT, load_config
 
 warnings.filterwarnings("ignore")
@@ -45,9 +52,22 @@ MODEL_INFO = {
     "ridge_regression":  ("Ridge (YOLO)",                "detection"),
     "random_forest":     ("Random Forest (YOLO)",        "detection"),
     "xgboost":           ("XGBoost (YOLO)",              "detection"),
-    "clip_ridge":        ("Ridge (CLIP embeddings)",     "clip"),
-    "hybrid_ridge":      ("Ridge (CLIP + YOLO)",         "hybrid"),
+    "embed_ridge":       ("Ridge (image embeddings)",    "embed"),
+    "table_ridge":       ("Ridge (embeddings + table)",  "embed_table"),
+    "hybrid_ridge":      ("Ridge (embeddings + YOLO)",   "hybrid"),
 }
+
+
+# Tie-break order for model selection: simplest / cheapest first
+SIMPLICITY = ["embed_ridge", "table_ridge", "hybrid_ridge", "ridge_regression", "linear_regression",
+              "random_forest", "xgboost"]
+
+
+def select_model(results, target, tolerance):
+    """Simplest model whose CV MAE is within `tolerance` of the best (avoids picking noise winners)."""
+    r = results[(results["target"] == target) & (results["model"] != "dummy_mean")].set_index("model")
+    best = r["MAE_mean"].min()
+    return next(k for k in SIMPLICITY if k in r.index and r.loc[k, "MAE_mean"] <= best + tolerance)
 
 
 def metrics(y_true, y_pred):
@@ -60,9 +80,9 @@ def metrics(y_true, y_pred):
             "Kendall_t":  np.nan if const else kendalltau(y_true, y_pred)[0]}
 
 
-def load_data(features_path, embeddings_path, labels_path):
+def load_data(features_path, embeddings_path, labels_path, emb_cfg=None):
     """
-    Join labels with YOLO features and CLIP embeddings, dropping images rated valid_room = 0.
+    Join labels with YOLO features and image embeddings, dropping images rated valid_room = 0.
     Returns (labels DataFrame, {feature set: X DataFrame}).
     """
     label = pd.read_csv(labels_path)
@@ -71,7 +91,8 @@ def load_data(features_path, embeddings_path, labels_path):
         label = label[label["valid_room"] != 0]
         log.info("Excluding %d images rated valid_room = 0 (not conference rooms)", n_bad)
     feat = pd.read_csv(features_path).set_index("filename")
-    emb  = load_embeddings(embeddings_path)
+    emb  = load_embeddings(embeddings_path, emb_cfg)
+    tab  = load_embeddings(embeddings_path, emb_cfg, kind="table")
 
     names = [f for f in label["filename"] if f in feat.index and f in emb.index]
     if not names:
@@ -81,8 +102,9 @@ def load_data(features_path, embeddings_path, labels_path):
     label = label.set_index("filename").loc[names].reset_index()
 
     det = feat.loc[names].select_dtypes("number").fillna(0.0)
-    clip = emb.loc[names]
-    X = {"detection": det, "clip": clip, "hybrid": pd.concat([clip, det], axis=1)}
+    emb_x, tab_x = emb.loc[names], tab.loc[names]
+    X = {"detection": det, "embed": emb_x, "embed_table": pd.concat([emb_x, tab_x], axis=1),
+         "hybrid": pd.concat([emb_x, det], axis=1)}
     return label, {k: v.reset_index(drop=True) for k, v in X.items()}
 
 
@@ -106,7 +128,8 @@ def make_models(config, seed):
                     colsample_bytree=float(xgb.get("colsample_bytree",0.8)),
                     min_child_weight=int(xgb.get("min_child_weight",2)),
                     random_state=seed, verbosity=0),
-        "clip_ridge":   ridge(),
+        "embed_ridge":  ridge(),
+        "table_ridge":  ridge(),
         "hybrid_ridge": ridge(),
     }
 
@@ -152,7 +175,7 @@ def plot_comparison(results, target, path):
         ax.barh(names, vals, xerr=errs, color=colors, capsize=3, edgecolor="none")
         ax.invert_yaxis(); ax.grid(axis="x", alpha=0.3)
         ax.set_title(f"{met} — {target} (lower is better)" if met == "MAE" else f"{met} — {target} (higher is better)", fontsize=10)
-    fig.suptitle("Repeated K-fold CV (mean ± std). Blue = YOLO features, orange = CLIP embeddings", fontsize=11)
+    fig.suptitle("Repeated K-fold CV (mean ± std). Blue = YOLO features, orange = image embeddings", fontsize=11)
     plt.tight_layout(); path.parent.mkdir(parents=True, exist_ok=True)
     plt.savefig(path, dpi=120, bbox_inches="tight"); plt.close()
     log.info("✓ Comparison chart → %s", path)
@@ -166,9 +189,11 @@ def train_and_evaluate(features_path, embeddings_path, labels_path, models_dir, 
     seed     = int(cfg.get("random_state", 42))
     folds    = int(cfg.get("cv_folds", 5))
     repeats  = int(cfg.get("cv_repeats", 5))
-    labels, X = load_data(features_path, embeddings_path, labels_path)
+    labels, X = load_data(features_path, embeddings_path, labels_path, config.get("embedding"))
     log.info("%d images | targets: %s | %d×%d-fold CV", len(labels), targets, repeats, folds)
 
+    level    = float(cfg.get("interval_level", 0.8))
+    split_at = float(cfg.get("interval_split_at", 4.0))
     rkf, rows, oof = RepeatedKFold(n_splits=folds, n_repeats=repeats, random_state=seed), [], {}
     for target in targets:
         y = labels[target].astype(float)
@@ -180,22 +205,46 @@ def train_and_evaluate(features_path, embeddings_path, labels_path, models_dir, 
                 m = clone(est).fit(Xs.iloc[tr], y.iloc[tr])
                 fold_scores.append(metrics(y.iloc[te].values, m.predict(Xs.iloc[te])))
             fs = pd.DataFrame(fold_scores)
+
+            # One K-fold pass of out-of-fold predictions: calibrates the score range (and feeds the plots)
+            pred = np.clip(cross_val_predict(clone(est), Xs, y, cv=KFold(folds, shuffle=True, random_state=seed)), 1, 5)
+            if target == primary:
+                oof[key] = pred
+            interval = fit_interval(y.values, pred, level, split_at)
+            cov, cov_messy = heldout_coverage(y.values, pred, level, split_at)
+            widths = [np.subtract(*apply_interval(p, interval)[::-1]) for p in pred]
             rows.append({"target": target, "model": key, "feature_set": MODEL_INFO[key][1],
                          **{f"{c}_mean": fs[c].mean() for c in fs.columns},
-                         **{f"{c}_std":  fs[c].std()  for c in fs.columns}})
-            if target == primary:   # one K-fold pass of out-of-fold predictions for plots and the CLIP comparison
-                oof[key] = cross_val_predict(clone(est), Xs, y, cv=KFold(folds, shuffle=True, random_state=seed))
+                         **{f"{c}_std":  fs[c].std()  for c in fs.columns},
+                         "range_width_mean": float(np.mean(widths)),
+                         "range_coverage_heldout": cov, "range_coverage_heldout_rated_le3": cov_messy})
 
             if key == "dummy_mean":
                 continue
             est.fit(Xs, y)   # final model is refit on all labelled data
             joblib.dump({"model": est, "feature_set": MODEL_INFO[key][1], "feature_cols": list(Xs.columns),
-                         "target": target}, models_dir/target/f"{key}.joblib")
+                         "target": target, "interval": interval,
+                         "embedding": config.get("embedding") if MODEL_INFO[key][1] != "detection" else None},
+                        models_dir/target/f"{key}.joblib")
         log.info("✓ %s: models saved → %s", target, models_dir/target)
 
     results = pd.DataFrame(rows)
     outputs_dir.mkdir(parents=True, exist_ok=True)
     results.to_csv(outputs_dir/"cv_results.csv", index=False)
+
+    # Model per target for the app's "auto" mode: simplest one within tolerance of the best CV MAE
+    selection = {t: select_model(results, t, float(cfg.get("selection_tolerance", 0.005))) for t in targets}
+    with open(models_dir/"selection.json", "w") as f:
+        json.dump(selection, f, indent=2)
+    log.info("✓ Best model per target %s → %s", selection, models_dir/"selection.json")
+
+    # Reference embeddings for the "is this a conference room photo?" check
+    ref = X["embed"].values.astype(np.float32)
+    ood = fit_reference(ref, percentile=float(cfg.get("ood_percentile", 1.0)))
+    np.savez(models_dir/"reference.npz", embeddings=ref.astype(np.float16), filenames=labels["filename"].to_numpy(dtype=str),
+             embedding_model=config["embedding"]["model_name"], views=np.array(config["embedding"]["views"]), **ood)
+    log.info("✓ OOD reference: %d photos, threshold %.3f (LOO median %.3f) → %s",
+             len(ref), ood["threshold"], ood["loo_median"], models_dir/"reference.npz")
 
     # Print summary tables
     cols = ["MAE", "RMSE", "R2", "Spearman_r", "Kendall_t"]
@@ -222,7 +271,7 @@ def train_and_evaluate(features_path, embeddings_path, labels_path, models_dir, 
         plot_importance(payload["model"], payload["feature_cols"],
                         outputs_dir/f"feature_importance_{key}.png", f"{MODEL_INFO[key][0]} — {primary}")
     plot_scatter(labels[primary].values,
-                 {MODEL_INFO[k][0]: oof[k] for k in ["ridge_regression", "xgboost", "clip_ridge", "hybrid_ridge"]},
+                 {MODEL_INFO[k][0]: oof[k] for k in ["ridge_regression", "xgboost", "embed_ridge", "table_ridge"]},
                  outputs_dir/"predicted_vs_actual.png")
     plot_comparison(results, primary, outputs_dir/"model_comparison.png")
     return results
@@ -238,7 +287,7 @@ def main():
     paths  = config.get("paths", {})
     train_and_evaluate(
         features_path   = args.features   or ROOT / paths.get("features_csv",   "features/features.csv"),
-        embeddings_path = args.embeddings or ROOT / paths.get("embeddings_npz", "features/clip_embeddings.npz"),
+        embeddings_path = args.embeddings or ROOT / paths.get("embeddings_npz", "features/embeddings.npz"),
         labels_path     = args.labels     or ROOT / paths.get("labels_csv",     "data/labels.csv"),
         models_dir      = ROOT / paths.get("models_dir",  "models"),
         outputs_dir     = ROOT / paths.get("outputs_dir", "outputs"),

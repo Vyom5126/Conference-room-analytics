@@ -6,7 +6,7 @@ paths:
   labels_csv: "data/labels.csv"               # AI-rated labels (see data/rating_rubric.md)
   detections_dir: "outputs/detections"
   features_csv: "features/features.csv"
-  embeddings_npz: "features/clip_embeddings.npz"
+  embeddings_npz: "features/embeddings.npz"
   models_dir: "models"
   outputs_dir: "outputs"
 
@@ -52,9 +52,11 @@ features:
     - tv
   floor_region_fraction: 0.45       # bottom fraction considered "floor"
 
-# Image embeddings (main model input)
+# Image embeddings (main model input). Compared on the rated set (overall, repeated 5x5 CV):
+#   CLIP B/32 ρ 0.68 · SigLIP2-base 0.70 · CLIP L/14 0.74 · DINOv2-base + views 0.76 (best, also smallest)
 embedding:
-  model_name: "openai/clip-vit-base-patch32"
+  model_name: "facebook/dinov2-base"
+  views: [pad, flip, tiles]         # averaged per image; see embed.py (pad/flip avoid cropping, tiles catch small clutter)
   batch_size: 16
 
 # Model training
@@ -65,7 +67,11 @@ model:
     - cleanliness_score
     - chair_alignment_score
     - clutter_score
-  default_model: "clip_ridge"       # used by evaluate.py and the Streamlit app
+  default_model: "auto"             # "auto" = best model per target (models/selection.json); or a model key
+  interval_level: 0.8               # score ranges cover ~80% of held-out ratings (split-conformal, intervals.py)
+  interval_split_at: 4.0            # separate, asymmetric ranges below / above this predicted score
+  selection_tolerance: 0.005        # "auto" picks the simplest model within this CV MAE of the best
+  ood_percentile: 1.0               # photos less similar to the training set than 99% of training photos get a warning
   ridge_alphas: [0.01, 0.1, 1, 10, 100, 1000, 10000]
   cv_folds: 5                       # K-fold CV (repeated) — replaces the old single 80/20 split
   cv_repeats: 5

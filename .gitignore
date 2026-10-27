@@ -30,6 +30,7 @@ runs/
 outputs/detections/
 outputs/candidate_detections/
 outputs/*.png
+outputs/*.jpg
 outputs/*.csv
 outputs/*.json
 

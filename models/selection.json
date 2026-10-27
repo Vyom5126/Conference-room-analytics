@@ -1,0 +1,6 @@
+{
+  "overall_score": "embed_ridge",
+  "cleanliness_score": "embed_ridge",
+  "chair_alignment_score": "embed_ridge",
+  "clutter_score": "table_ridge"
+}

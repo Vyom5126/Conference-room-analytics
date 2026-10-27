@@ -70,8 +70,9 @@ def get_config():
 config = get_config()
 
 MODEL_LABELS = {
-    "clip_ridge":       "CLIP linear probe (best)",
-    "hybrid_ridge":     "CLIP + YOLO features",
+    "auto":             "Best model per score (recommended)",
+    "embed_ridge":      "Image embeddings only",
+    "table_ridge":      "Image embeddings + table close-up",
     "ridge_regression": "YOLO features only (baseline)",
 }
 
@@ -102,6 +103,9 @@ if uploaded:
             list(MODEL_LABELS),
             format_func=MODEL_LABELS.get,
         )
+        show_heatmap = st.checkbox("Show score heatmap (experimental)", value=False,
+                                   help="Red areas pull the score down, relative to the rest of the photo. "
+                                        "It highlights objects reliably but can't tell place settings from leftovers.")
         run = st.button("🔍 Evaluate Room", width="stretch", type="primary")
 
     if run:
@@ -110,18 +114,26 @@ if uploaded:
             st.error("❌ Could not decode the uploaded image.")
             st.stop()
 
-        with st.spinner("Detecting objects and scoring… (the first run downloads the CLIP model)"):
+        with st.spinner("Detecting objects and scoring… (the first run downloads the image model)"):
             try:
                 result = ev.run(img, model_name, save_outputs=False, config=config,
-                                name=uploaded.name, quiet=True)
+                                name=uploaded.name, quiet=True, explain=show_heatmap)
             except Exception as exc:
                 st.error(f"❌ Error: {exc}")
                 st.stop()
 
         overall   = result["overall_score"]
+        lo, hi    = result["overall_range"]
         breakdown = result["breakdown"]
+        ranges    = result["ranges"]
         feat      = result["features"]
         warns     = result["warnings"]
+        ood       = result["ood"]
+
+        if ood and ood["flagged"]:
+            st.warning("This photo looks unlike the conference rooms the model was trained on "
+                       f"(similarity {ood['similarity']:.2f}, typical ≥ {ood['threshold']:.2f}). "
+                       "The scores below are unreliable.")
 
         # ── Score hero ───────────────────────────────────────────────────────
         st.markdown(f"""
@@ -130,6 +142,7 @@ if uploaded:
             <div class="score-denom">/ 5.0</div>
             <div class="score-stars">{ev.stars(overall)}</div>
             <div class="score-label">{score_label(overall)}</div>
+            <div class="score-denom">likely range {lo:.1f} – {hi:.1f}</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -137,10 +150,18 @@ if uploaded:
         st.markdown('<p class="section-label">Detected Objects</p>', unsafe_allow_html=True)
         st.image(cv2.cvtColor(result["annotated"], cv2.COLOR_BGR2RGB), width="stretch")
 
+        if result.get("heatmap") is not None:
+            st.markdown('<p class="section-label">Score Heatmap (experimental)</p>', unsafe_allow_html=True)
+            st.image(cv2.cvtColor(result["heatmap"], cv2.COLOR_BGR2RGB), width="stretch")
+            st.caption("Experimental. Red marks image regions the model's features weigh negatively, relative to "
+                       "the rest of this photo. It highlights objects reliably, but it is not a to-do list: in tests, "
+                       "erasing the highlighted objects barely changed the score, because the model grades the room as a whole.")
+
         # ── Score breakdown gauges ───────────────────────────────────────────
         st.markdown('<p class="section-label">Score Breakdown</p>', unsafe_allow_html=True)
         for dim, val in breakdown.items():
-            st.text(f"{dim}: {val:.1f} / 5.0")
+            r_lo, r_hi = ranges[dim]
+            st.text(f"{dim}: {val:.1f} / 5.0   (likely {r_lo:.1f}–{r_hi:.1f})")
             st.progress(max(0.0, min(1.0, (val - 1) / 4)))
 
         # ── Key stats ────────────────────────────────────────────────────────
@@ -158,4 +179,5 @@ if uploaded:
                 st.markdown(f'<div class="warn-box">{w}</div>', unsafe_allow_html=True)
 
         # ── Model badge ──────────────────────────────────────────────────────
-        st.caption(f"Model: {MODEL_LABELS[model_name]}")
+        used = ", ".join(f"{t.replace('_score', '').replace('_', ' ')}: {k}" for t, k in result["models_used"].items())
+        st.caption(f"Model: {MODEL_LABELS[model_name]} ({used}). Ranges cover about 80% of held-out ratings.")

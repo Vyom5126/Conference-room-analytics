@@ -1,12 +1,15 @@
 """
 evaluate.py
 Score one conference room image end-to-end:
-  image → CLIP embedding + YOLO detections → per-dimension quality models → report
+  image → YOLO detections + image embeddings → per-dimension quality models → report
 
-Also saves an annotated image and a score bar chart.
+Each score comes with a range calibrated on held-out errors, a warning if the photo
+looks unlike the training photos, and (optionally) a heatmap of the regions that
+pull the score down.
 
 Usage:
     python src/evaluate.py --image path/to/room.jpg
+    python src/evaluate.py --image path/to/room.jpg --explain
     python src/evaluate.py --image path/to/room.jpg --model ridge_regression --no-save
 """
 import argparse, json, logging, sys
@@ -17,8 +20,10 @@ import matplotlib; matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from utils import ROOT, load_config
 from detect import detect_image
-from embed import embed_images, embedding_cols
+from embed import embed_images, embed_tables, embedding_cols
 from features import compute_features
+from intervals import apply_interval
+from ood import knn_similarity
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s", datefmt="%H:%M:%S")
 log = logging.getLogger(__name__)
@@ -38,7 +43,9 @@ DIMENSIONS = {
     "chair_alignment_score": "Chair Alignment",
     "clutter_score":         "Table Clear of Clutter",
 }
-MODEL_CHOICES = ["clip_ridge", "hybrid_ridge", "linear_regression", "ridge_regression", "random_forest", "xgboost"]
+MODEL_CHOICES = ["auto", "embed_ridge", "table_ridge", "hybrid_ridge",
+                 "linear_regression", "ridge_regression", "random_forest", "xgboost"]
+EMBED_SETS = ("embed", "embed_table", "hybrid")
 
 
 def stars(score):
@@ -70,27 +77,51 @@ def load_model(models_dir, target, model_name):
     return _ml_cache[str(path)]
 
 
-def predict(inputs, models_dir, model_name, targets):
+def resolve_models(models_dir, model_name, targets):
+    """{target: model key}. 'auto' uses the best model per target saved by score.py."""
+    if model_name != "auto":
+        return {t: model_name for t in targets}
+    path = models_dir / "selection.json"
+    if not path.exists():
+        raise FileNotFoundError(f"{path} not found. Run score.py first.")
+    with open(path, encoding="utf-8") as f:
+        selection = json.load(f)
+    return {t: selection[t] for t in targets}
+
+
+def load_reference(models_dir):
+    """Training embeddings + threshold for the out-of-domain check (cached); None if missing."""
+    path = models_dir / "reference.npz"
+    if "reference" not in _ml_cache:
+        _ml_cache["reference"] = dict(np.load(path)) if path.exists() else None
+    return _ml_cache["reference"]
+
+
+def predict(inputs, models_dir, chosen):
     """
-    Predict every target with one model family.
-    `inputs` maps column name → value (detection features and/or emb_### columns).
-    Returns {target: score clipped to [1, 5]}.
+    Predict every target with its chosen model.
+    `inputs` maps column name → value (detection features, emb_### and tab_### columns).
+    Returns {target: (score, low, high)}, all clipped to [1, 5].
     """
-    scores = {}
-    for target in targets:
-        payload = load_model(models_dir, target, model_name)
+    out = {}
+    for target, key in chosen.items():
+        payload = load_model(models_dir, target, key)
         missing = [c for c in payload["feature_cols"] if c not in inputs]
         if missing:
-            raise ValueError(f"Model {target}/{model_name} expects {len(missing)} inputs that are not "
+            raise ValueError(f"Model {target}/{key} expects {len(missing)} inputs that are not "
                              f"produced (e.g. {missing[:3]}). Retrain with: python src/score.py")
         X = pd.DataFrame([[inputs[c] for c in payload["feature_cols"]]], columns=payload["feature_cols"])
-        scores[target] = float(np.clip(payload["model"].predict(X)[0], 1.0, 5.0))
-    return scores
+        s = float(np.clip(payload["model"].predict(X)[0], 1.0, 5.0))
+        out[target] = (s, *apply_interval(s, payload["interval"])) if "interval" in payload else (s, s, s)
+    return out
 
 
-def observations(scores, feat):
-    """Human-readable notes from predicted sub-scores and detections."""
-    notes = [f"⚠ Low {name.lower()} ({scores[t]:.1f})" for t, name in DIMENSIONS.items() if scores.get(t, 5) < 3.0]
+def observations(scores, feat, ood=None):
+    """Human-readable notes from predicted sub-scores, detections and the out-of-domain check."""
+    notes = []
+    if ood and ood["flagged"]:
+        notes.append("⚠ Photo unlike the training rooms: scores unreliable")
+    notes += [f"⚠ Low {name.lower()} ({scores[t]:.1f})" for t, name in DIMENSIONS.items() if scores.get(t, 5) < 3.0]
     if feat.get("clutter_object_count", 0) >= 3:   # YOLO can't tell place settings from leftovers
         notes.append(f"ℹ {int(feat['clutter_object_count'])} small objects detected (cups, bottles, laptops…)")
     if feat.get("person_present", 0):   notes.append("ℹ Room is occupied")
@@ -125,17 +156,20 @@ def annotate(img, dets, score, feat):
     bf = max(0.6, bh2/80)
     cv2.putText(img, f"Quality: {score:.1f}/5.0", (12,int(bh2*0.55)),
                 cv2.FONT_HERSHEY_SIMPLEX, bf, (220,200,100), 2, cv2.LINE_AA)
-    cv2.putText(img, f"Clutter items: {int(feat.get('clutter_object_count',0))}  Chairs: {int(feat.get('chair_count',0))}",
+    cv2.putText(img, f"Small items: {int(feat.get('clutter_object_count',0))}  Chairs: {int(feat.get('chair_count',0))}",
                 (12,int(bh2*0.92)), cv2.FONT_HERSHEY_SIMPLEX, bf*0.75, (160,200,255), 1, cv2.LINE_AA)
     return img
 
 
-def save_chart(overall, breakdown, path):
-    """Save a horizontal bar chart showing each quality dimension."""
+def save_chart(overall, breakdown, ranges, path):
+    """Save a horizontal bar chart of each dimension with its calibrated range."""
+    names = list(breakdown)
+    vals = [breakdown[n] for n in names]
+    errs = np.array([[v - ranges[n][0] for n, v in zip(names, vals)], [ranges[n][1] - v for n, v in zip(names, vals)]])
     fig, ax = plt.subplots(figsize=(7, 3))
-    ax.barh(list(breakdown.keys()), list(breakdown.values()), edgecolor="none")
+    ax.barh(names, vals, xerr=errs, capsize=4, edgecolor="none")
     ax.set_xlim(0, 5.5)
-    ax.set_xlabel("Predicted score (5 = best)")
+    ax.set_xlabel("Predicted score (5 = best), bars show the ~80% range")
     ax.set_title(f"Quality: {overall:.1f}/5.0  {stars(overall)}")
     ax.axvline(x=overall, color="gray", linestyle="--", lw=1, label=f"Overall {overall:.1f}")
     ax.legend()
@@ -145,19 +179,20 @@ def save_chart(overall, breakdown, path):
     log.info("✓ Score chart → %s", path)
 
 
-def print_report(name, overall, breakdown, dets, notes):
+def print_report(name, scores, primary, dets, notes):
     """Print a formatted quality report to the terminal."""
     obj_str = ", ".join(f"{v}x {k}" for k,v in Counter(d["class"] for d in dets).most_common())
-    W = 52; B = "="*W; T = "-"*W
+    W = 60; B = "="*W; T = "-"*W
+    line = lambda label, t: f"|  {label+':':24} {scores[t][0]:.1f} / 5.0  ({scores[t][1]:.1f}–{scores[t][2]:.1f})  {stars(scores[t][0])}"
     print(f"\n+{B}+")
     print(f"|  {'Conference Room Quality Report':^{W-2}}  |")
     print(f"+{B}+")
     print(f"|  Image: {name[:W-9]:<{W-9}}|")
     print(f"+{B}+")
-    print(f"|  {'Overall Score:':24} {overall:.1f} / 5.0   {stars(overall):<{W-40}}|")
+    print(f"{line('Overall Score', primary):<{W+1}}|")
     print(f"+{B}+")
-    for dim, val in breakdown.items():
-        print(f"|  {dim+':':24} {val:.1f} / 5.0   {stars(val):<{W-40}}|")
+    for t, label in DIMENSIONS.items():
+        print(f"{line(label, t):<{W+1}}|")
     print(f"+{B}+")
     print(f"|  Objects: {obj_str[:W-12]:<{W-12}}|")
     if notes:
@@ -166,11 +201,12 @@ def print_report(name, overall, breakdown, dets, notes):
     print(f"+{B}+\n")
 
 
-def run(image, model_name, save_outputs, config, name=None, quiet=False):
+def run(image, model_name, save_outputs, config, name=None, quiet=False, explain=False):
     """
     Run the complete evaluation pipeline on one image.
     `image` is a file path or a BGR numpy array (pass `name` for arrays).
-    Returns the result dict; result["annotated"] holds the annotated BGR image.
+    Returns the result dict; result["annotated"] holds the annotated BGR image and
+    result["heatmap"] the explanation overlay (None unless explain=True and the model supports it).
     """
     if isinstance(image, (str, Path)):
         image = Path(image)
@@ -187,25 +223,47 @@ def run(image, model_name, save_outputs, config, name=None, quiet=False):
     outputs_dir = ROOT / paths.get("outputs_dir",    "outputs")
     primary     = config["model"].get("target_column", "overall_score")
     targets     = [primary] + [t for t in DIMENSIONS if t != primary]
+    chosen      = resolve_models(models_dir, model_name, targets)
+    payloads    = {t: load_model(models_dir, t, k) for t, k in chosen.items()}
+    sets        = {p["feature_set"] for p in payloads.values()}
 
     log.info("Detecting objects…")
     dets = detect_image(img, config)
     feat = get_features(dets, config)
-    inputs = dict(feat)
-    if load_model(models_dir, primary, model_name)["feature_set"] in ("clip", "hybrid"):
-        log.info("Embedding image…")
-        emb = embed_images([img], config)[0]
-        inputs.update(zip(embedding_cols(len(emb)), emb))
+    inputs, x, heatmap = dict(feat), None, None
 
-    scores    = predict(inputs, models_dir, model_name, targets)
-    overall   = scores[primary]
-    breakdown = {DIMENSIONS[t]: round(scores[t], 2) for t in DIMENSIONS}
-    notes     = observations(scores, feat)
+    if sets & set(EMBED_SETS):
+        emb_cfg = next(p["embedding"] for p in payloads.values() if p["feature_set"] in EMBED_SETS)
+        if explain:
+            from explain import explain as explain_fn
+            res = explain_fn(img, payloads[primary])
+            if res is not None:
+                heatmap, _, x = res
+        if x is None:
+            log.info("Embedding image…")
+            x = embed_images([img], emb_cfg)[0]   # embed exactly as the models were trained
+        inputs.update(zip(embedding_cols(len(x)), x))
+        if "embed_table" in sets:
+            tab, _ = embed_tables([img], [dets], emb_cfg)
+            inputs.update(zip(embedding_cols(tab.shape[1], "tab"), tab[0]))
+
+    scores = predict(inputs, models_dir, chosen)
+
+    ood, ref = None, load_reference(models_dir)
+    if x is not None and ref is not None:
+        sim = float(knn_similarity(x, ref["embeddings"].astype(np.float32), int(ref["k"]))[0])
+        ood = {"similarity": sim, "threshold": float(ref["threshold"]), "flagged": sim < float(ref["threshold"])}
+
+    overall   = scores[primary][0]
+    breakdown = {DIMENSIONS[t]: round(scores[t][0], 2) for t in DIMENSIONS}
+    ranges    = {DIMENSIONS[t]: (round(scores[t][1], 2), round(scores[t][2], 2)) for t in DIMENSIONS}
+    notes     = observations({t: v[0] for t, v in scores.items()}, feat, ood)
     if not quiet:
-        print_report(name, overall, breakdown, dets, notes)
+        print_report(name, scores, primary, dets, notes)
 
-    result = {"image": name, "model": model_name,
-              "overall_score": overall, "breakdown": breakdown,
+    result = {"image": name, "model": model_name, "models_used": chosen,
+              "overall_score": overall, "overall_range": (round(scores[primary][1], 2), round(scores[primary][2], 2)),
+              "breakdown": breakdown, "ranges": ranges, "ood": ood,
               "features": feat, "detections_count": len(dets), "detections": dets, "warnings": notes}
     annotated = annotate(img, dets, overall, feat)
 
@@ -215,26 +273,31 @@ def run(image, model_name, save_outputs, config, name=None, quiet=False):
         ann_path.parent.mkdir(parents=True, exist_ok=True)
         cv2.imwrite(str(ann_path), annotated)
         log.info("✓ Annotated image → %s", ann_path)
-        save_chart(overall, breakdown, outputs_dir/f"{stem}_score_chart.png")
+        if heatmap is not None:
+            cv2.imwrite(str(outputs_dir/f"{stem}_heatmap.jpg"), heatmap)
+            log.info("✓ Heatmap → %s", outputs_dir/f"{stem}_heatmap.jpg")
+        save_chart(overall, breakdown, ranges, outputs_dir/f"{stem}_score_chart.png")
         jp = outputs_dir/f"{stem}_result.json"
         jp.parent.mkdir(parents=True, exist_ok=True)
-        with open(jp, "w") as f:
-            json.dump(result, f, indent=2)
+        with open(jp, "w", encoding="utf-8") as f:
+            json.dump(result, f, indent=2, ensure_ascii=False)
         log.info("✓ JSON → %s", jp)
-    return {**result, "annotated": annotated}
+    return {**result, "annotated": annotated, "heatmap": heatmap}
 
 
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--image",   type=Path, required=True)
     p.add_argument("--model",   type=str, choices=MODEL_CHOICES)
+    p.add_argument("--explain", action="store_true", help="also save the experimental score heatmap")
     p.add_argument("--no-save", action="store_true")
     p.add_argument("--config",  type=Path)
     args = p.parse_args()
     if not args.image.exists():
         log.error("Image not found: %s", args.image); sys.exit(1)
     config = load_config(args.config)
-    run(args.image, args.model or config["model"].get("default_model", "clip_ridge"), not args.no_save, config)
+    run(args.image, args.model or config["model"].get("default_model", "auto"), not args.no_save, config,
+        explain=args.explain)
 
 if __name__ == "__main__":
     main()

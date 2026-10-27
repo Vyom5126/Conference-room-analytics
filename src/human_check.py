@@ -75,7 +75,7 @@ def main():
     human = pd.read_csv(HUMAN_CSV)
     oof_path = ROOT / config["paths"].get("outputs_dir", "outputs") / "oof_predictions.csv"
     oof = pd.read_csv(oof_path) if oof_path.exists() else None
-    r = report(labels, human, oof, config["model"].get("default_model", "clip_ridge"))
+    r = report(labels, human, oof, config["model"].get("default_model", "embed_ridge"))
     print("\n" + r.to_string(index=False, float_format=lambda x: f"{x:.3f}") + "\n")
 
 

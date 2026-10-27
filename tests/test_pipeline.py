@@ -1,4 +1,4 @@
-"""Tests for score.load_data, evaluate helpers and human_check (no YOLO or CLIP needed)."""
+"""Tests for score.load_data, evaluate helpers and human_check (no YOLO or image model needed)."""
 import sys
 from pathlib import Path
 
@@ -18,7 +18,8 @@ def tiny_dataset(tmp_path):
     pd.DataFrame({"filename": names, "overall_score": [1, 2, 3, 4], "valid_room": [1, 1, 1, 0]}) \
         .to_csv(tmp_path / "labels.csv", index=False)
     pd.DataFrame({"filename": names, "chair_count": [1.0, 2.0, 3.0, 4.0]}).to_csv(tmp_path / "features.csv", index=False)
-    np.savez(tmp_path / "emb.npz", filenames=np.array(names[::-1]), embeddings=np.arange(8, dtype=np.float32).reshape(4, 2))
+    np.savez(tmp_path / "emb.npz", filenames=np.array(names[::-1]), embeddings=np.arange(8, dtype=np.float32).reshape(4, 2),
+             table_embeddings=-np.arange(8, dtype=np.float32).reshape(4, 2))
     return tmp_path
 
 
@@ -27,7 +28,9 @@ def test_load_data_drops_invalid_rooms_and_aligns_rows(tiny_dataset):
     assert list(labels["filename"]) == ["img_0.jpg", "img_1.jpg", "img_2.jpg"]
     assert list(X["detection"]["chair_count"]) == [1.0, 2.0, 3.0]
     # embeddings were saved in reverse order; rows must still line up with labels
-    assert X["clip"].iloc[0].tolist() == [6.0, 7.0]
+    assert X["embed"].iloc[0].tolist() == [6.0, 7.0]
+    assert X["embed_table"].iloc[0].tolist() == [6.0, 7.0, -6.0, -7.0]
+    assert list(X["embed_table"].columns) == ["emb_000", "emb_001", "tab_000", "tab_001"]
     assert X["hybrid"].shape == (3, 3)
 
 
@@ -61,6 +64,19 @@ def test_make_sample_skips_invalid_and_covers_low_scores():
 def test_report_compares_human_with_ai_and_model():
     labels = pd.DataFrame({"filename": ["a", "b", "c"], "overall_score": [2.0, 3.0, 5.0]})
     human  = pd.DataFrame({"filename": ["a", "b", "c"], "overall_score": [2.5, 3.0, 4.5]})
-    oof    = pd.DataFrame({"filename": ["a", "b", "c"], "clip_ridge": [2.0, 3.5, 4.0]})
-    r = report(labels, human, oof, "clip_ridge")
+    oof    = pd.DataFrame({"filename": ["a", "b", "c"], "embed_ridge": [2.0, 3.5, 4.0]})
+    r = report(labels, human, oof, "embed_ridge")
     assert len(r) == 2 and r["spearman"].tolist() == pytest.approx([1.0, 1.0])
+
+
+def test_make_views_counts_and_padding():
+    from PIL import Image
+    from embed import make_views, pad_square
+    im = Image.new("RGB", (400, 300), (10, 20, 30))
+    assert pad_square(im).size == (400, 400)            # padded, never cropped
+    views = make_views(im, ["pad", "flip", "tiles"])
+    assert len(views) == 6 and all(v.size[0] == v.size[1] for v in views)
+    assert views[2].size == (200, 200)                  # each tile is a padded quarter (200x150 → 200x200)
+    assert make_views(im, ["center"])[0] is im
+    with pytest.raises(ValueError):
+        make_views(im, ["zoom"])
